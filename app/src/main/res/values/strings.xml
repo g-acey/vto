@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">vto</string>
+    <string name="password_criteria">* Must have at least 6 characters"\n"* Must include at least 1 number"\n"* Must include at least 1 capital letter"\n"</string>
+    <string name="sign_up_welcome">Lets get you set up before we"\n"continue</string>
+    <string name="login_welcome">You are back, we have been missed</string>
+    <string name="sign_up_question">Already have an account?</string>
+    <string name="login_question">Don’t have an account?</string>
 </resources>

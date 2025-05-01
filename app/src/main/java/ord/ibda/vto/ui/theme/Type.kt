@@ -6,29 +6,73 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-// Set of Material typography styles to start with
-val Typography = Typography(
-    bodyLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.5.sp
+import androidx.compose.ui.text.googlefonts.GoogleFont
+import androidx.compose.ui.text.googlefonts.Font
+import ord.ibda.vto.R
+
+val provider = GoogleFont.Provider(
+    providerAuthority = "com.google.android.gms.fonts",
+    providerPackage = "com.google.android.gms",
+    certificates = R.array.com_google_android_gms_fonts_certs
+)
+
+val bodyFontFamily = FontFamily(
+    Font(
+        googleFont = GoogleFont("Roboto"),
+        fontProvider = provider,
     )
-    /* Other default text styles to override
-    titleLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 22.sp,
-        lineHeight = 28.sp,
-        letterSpacing = 0.sp
-    ),
-    labelSmall = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Medium,
-        fontSize = 11.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.5.sp
+)
+
+val fontName = GoogleFont("Poppins")
+
+val fontFamily = FontFamily(
+    Font(
+        googleFont = fontName,
+        fontProvider = provider
     )
-    */
+)
+
+val fontFamilyMedium= FontFamily(
+    Font(
+        googleFont = fontName,
+        fontProvider = provider,
+        weight = FontWeight.Medium
+    )
+)
+
+val fontFamilySemiBold= FontFamily(
+    Font(
+        googleFont = fontName,
+        fontProvider = provider,
+        weight = FontWeight.SemiBold
+    )
+)
+
+val fontFamilyBold= FontFamily(
+    Font(
+        googleFont = fontName,
+        fontProvider = provider,
+        weight = FontWeight.Bold
+    )
+)
+
+// Default Material 3 typography values
+val baseline = Typography()
+
+val AppTypography = Typography(
+    displayLarge = baseline.displayLarge.copy(fontFamily = fontFamily),
+    displayMedium = baseline.displayMedium.copy(fontFamily = fontFamilySemiBold),
+    displaySmall = baseline.displaySmall.copy(fontFamily = fontFamily),
+    headlineLarge = baseline.headlineLarge.copy(fontFamily = fontFamily),
+    headlineMedium = baseline.headlineMedium.copy(fontFamily = fontFamilyMedium),
+    headlineSmall = baseline.headlineSmall.copy(fontFamily = fontFamily),
+    titleLarge = baseline.titleLarge.copy(fontFamily = fontFamily),
+    titleMedium = baseline.titleMedium.copy(fontFamily = fontFamily),
+    titleSmall = baseline.titleSmall.copy(fontFamily = fontFamily),
+    bodyLarge = baseline.bodyLarge.copy(fontFamily = bodyFontFamily),
+    bodyMedium = baseline.bodyMedium.copy(fontFamily = bodyFontFamily),
+    bodySmall = baseline.bodySmall.copy(fontFamily = bodyFontFamily),
+    labelLarge = baseline.labelLarge.copy(fontFamily = bodyFontFamily),
+    labelMedium = baseline.labelMedium.copy(fontFamily = bodyFontFamily),
+    labelSmall = baseline.labelSmall.copy(fontFamily = bodyFontFamily),
 )
