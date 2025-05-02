@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import ord.ibda.vto.ui.loginscreen.LoginScreen
+import ord.ibda.vto.ui.signupscreen.SignUpScreen
 import ord.ibda.vto.ui.theme.AppTheme
 
 class MainActivity : ComponentActivity() {
@@ -21,7 +22,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             AppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    LoginScreen(
+                    SignUpScreen(
                         modifier = Modifier.padding(innerPadding)
                     )
                 }

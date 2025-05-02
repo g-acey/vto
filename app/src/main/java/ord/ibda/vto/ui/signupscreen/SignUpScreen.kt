@@ -1,4 +1,4 @@
-package ord.ibda.vto.ui.loginscreen
+package ord.ibda.vto.ui.signupscreen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -15,8 +15,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -37,20 +39,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import okhttp3.internal.http2.FlowControlListener
 import ord.ibda.vto.R
-import ord.ibda.vto.ui.signupscreen.TextInputForm
 import ord.ibda.vto.ui.theme.AppTheme
 
 
 @Composable
-fun LoginScreen(
-//    homeViewModel: HomeViewModel = hiltViewModel(),
+fun SignUpScreen(
+//    signUpViewModel: signUpViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -78,14 +77,14 @@ fun LoginScreen(
                     style = MaterialTheme.typography.displayMedium
                 )
                 Text(
-                    text = stringResource(R.string.login_welcome),
+                    text = stringResource(R.string.sign_up_welcome),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier
                         .padding(start = 5.dp)
                 )
             }
-            LoginBottomSheet(
+            SignUpBottomSheet(
                 submitForm= {},
                 clickText= {},
                 modifier = Modifier
@@ -101,7 +100,7 @@ fun LoginScreen(
 }
 
 @Composable
-fun LoginBottomSheet(
+fun SignUpBottomSheet(
     submitForm: () -> Unit,
     clickText: () -> Unit,
     modifier: Modifier = Modifier
@@ -116,10 +115,10 @@ fun LoginBottomSheet(
                 .padding(bottom = 60.dp)
         ) {
             Text(
-                text = "Let's sign you in",
+                text = "Create Account",
                 style = MaterialTheme.typography.headlineMedium,
             )
-            LoginForm(
+            SignUpForm(
                 submitForm,
                 modifier = Modifier
                     .padding(horizontal = 20.dp)
@@ -128,11 +127,11 @@ fun LoginBottomSheet(
                 modifier = Modifier
             ) {
                 Text(
-                    text = stringResource(R.string.login_question),
+                    text = stringResource(R.string.sign_up_question),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    text = " Sign up",
+                    text = " Login",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
@@ -144,8 +143,36 @@ fun LoginBottomSheet(
 }
 
 @Composable
+fun TextInputForm(
+    label: String,
+    modifier: Modifier = Modifier
+) {
+    var value by remember { mutableStateOf("") }
+
+    OutlinedTextField(
+        value = value,
+        onValueChange = { value = it },
+        singleLine = true,
+        maxLines = 1,
+        label = { Text(label) },
+        trailingIcon = {
+            if (value.isNotEmpty()) {
+                IconButton(onClick = { value = "" }) {
+                    Icon(
+                        imageVector = Icons.Default.Clear,
+                        contentDescription = "Clear text"
+                    )
+                }
+            }
+        },
+        modifier = modifier
+    )
+}
+
+@Composable
 fun PasswordInputForm(
     label: String,
+    supportingText: String = "",
     modifier: Modifier = Modifier
 ) {
     var password by remember { mutableStateOf("") }
@@ -155,6 +182,7 @@ fun PasswordInputForm(
         value = password,
         onValueChange = { password = it },
         label = { Text(text = label) },
+        supportingText = { Text(text = supportingText) },
         singleLine = true,
         maxLines = 1,
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -174,37 +202,25 @@ fun PasswordInputForm(
 }
 
 @Composable
-fun LoginForm(
+fun SignUpForm(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(28.dp)
+        verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         TextInputForm(
             label = "Username",
             modifier = Modifier
                 .fillMaxWidth()
         )
-        Column(
-            modifier = Modifier,
-        ) {
-            PasswordInputForm(
-                label = "Password",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 10.dp)
-            )
-            Text(
-                text = stringResource(R.string.login_forget),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .fillMaxWidth()
-            )
-        }
+        PasswordInputForm(
+            label = "Password",
+            stringResource(R.string.password_criteria),
+            modifier = Modifier
+                .fillMaxWidth()
+        )
         Button(
             onClick = { onClick() },
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onPrimaryContainer),
@@ -226,8 +242,8 @@ fun LoginForm(
 
 @Preview(showBackground = true)
 @Composable
-fun LoginScreenPreview() {
+fun SignUpScreenPreview() {
     AppTheme {
-        LoginScreen()
+        SignUpScreen()
     }
 }

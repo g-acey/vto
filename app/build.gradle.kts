@@ -60,7 +60,8 @@ dependencies {
     implementation(libs.androidx.room.runtime.ktx)
     implementation(libs.google.accompanist.navigation.animation)
     implementation(libs.google.dagger.hilt.android)
-    implementation("androidx.compose.ui:ui-text-google-fonts:1.7.8")
+    implementation(libs.androidx.ui.text.google.fonts)
+    implementation (libs.androidx.material.icons.extended)
 
     implementation(libs.coil.compose)
     implementation(libs.okhttp3)
