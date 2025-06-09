@@ -60,14 +60,14 @@ val fontFamilyBold= FontFamily(
 val baseline = Typography()
 
 val AppTypography = Typography(
-    displayLarge = baseline.displayLarge.copy(fontFamily = fontFamily),
+    displayLarge = baseline.displayLarge.copy(fontFamily = fontFamilyBold),
     displayMedium = baseline.displayMedium.copy(fontFamily = fontFamilySemiBold),
     displaySmall = baseline.displaySmall.copy(fontFamily = fontFamily),
     headlineLarge = baseline.headlineLarge.copy(fontFamily = fontFamily),
     headlineMedium = baseline.headlineMedium.copy(fontFamily = fontFamilyMedium),
     headlineSmall = baseline.headlineSmall.copy(fontFamily = fontFamily),
     titleLarge = baseline.titleLarge.copy(fontFamily = fontFamily),
-    titleMedium = baseline.titleMedium.copy(fontFamily = fontFamily),
+    titleMedium = baseline.titleMedium.copy(fontFamily = fontFamilyMedium),
     titleSmall = baseline.titleSmall.copy(fontFamily = fontFamily),
     bodyLarge = baseline.bodyLarge.copy(fontFamily = bodyFontFamily),
     bodyMedium = baseline.bodyMedium.copy(fontFamily = bodyFontFamily),

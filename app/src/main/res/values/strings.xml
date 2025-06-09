@@ -1,9 +1,16 @@
 <resources>
     <string name="app_name">vto</string>
+    <string name="welcome_message">A new"\n"look for"\n"a new"\n"day</string>
     <string name="password_criteria">* Must have at least 6 characters"\n"* Must include at least 1 number"\n"* Must include at least 1 capital letter"\n"</string>
     <string name="login_forget">Forget password?</string>
     <string name="sign_up_welcome">Lets get you set up before we"\n"continue</string>
     <string name="login_welcome">You are back, we have been"\n"missed</string>
     <string name="sign_up_question">Already have an account?</string>
     <string name="login_question">Don’t have an account?</string>
+    <string name="about_product_title1">Composition and care</string>
+    <string name="about_product_description1">The product is made of 49% of viscose, 44% cotton, 7% linen. To maintain the products quality it is recommended to machine wash up to 30°C/86°F gentle cycle, do not bleach and make sure to iron up to 110°C/230°F.</string>
+    <string name="about_product_title2">In-store Availability</string>
+    <string name="about_product_description2">There is currently no physical store available, but we have an upcoming branch in Indonesia soon.</string>
+    <string name="about_product_title3">Deliveries and returns</string>
+    <string name="about_product_description3">There are 2 shipping methods available Express home (arrives within 1 to 2 business days) which cost around 30.000 IDR and Standard home (arrives within 1 to 3 business days) which cost around 15.000 IDR. For returns, kindly send us an email with prove of ur unboxing video and we will send instructions to process the return for you.</string>
 </resources>
