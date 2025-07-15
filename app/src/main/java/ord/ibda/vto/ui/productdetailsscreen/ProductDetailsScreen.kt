@@ -105,7 +105,7 @@ fun ProductDetailsScreen(
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.surfaceContainerLow)
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 20.dp)
+                    .padding(horizontal = 20.dp, vertical = 20.dp)
                     .weight(1f)
             ) {
                 Button(
@@ -135,6 +135,7 @@ fun ProductTitle(
 ) {
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.Bottom,
         modifier = modifier
             .fillMaxWidth()
     ) {
@@ -160,7 +161,7 @@ fun ProductDescription(
 ){
     Box(
         modifier = modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 20.dp, vertical = 8.dp)
     ) {
         Column(
             modifier = Modifier
@@ -272,8 +273,11 @@ fun AboutProduct(
             Text(
                 text = stringResource(R.string.about_product_description1),
                 color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.bodySmall.copy(
+                    textAlign = TextAlign.Justify
+                ),
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(vertical = 12.dp)
             )
         }
         ExpandableSection(
@@ -283,8 +287,11 @@ fun AboutProduct(
             Text(
                 text = stringResource(R.string.about_product_description2),
                 color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.bodySmall.copy(
+                    textAlign = TextAlign.Justify
+                ),
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(vertical = 12.dp)
             )
         }
         ExpandableSection(
@@ -294,8 +301,11 @@ fun AboutProduct(
             Text(
                 text = stringResource(R.string.about_product_description3),
                 color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.bodySmall.copy(
+                    textAlign = TextAlign.Justify
+                ),
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(vertical = 12.dp)
             )
         }
     }
@@ -368,7 +378,7 @@ fun PartialBottomSheet(
                     contentColor = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .padding(16.dp)
+                        .padding(horizontal = 20.dp, vertical = 12.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.CenterFocusWeak,

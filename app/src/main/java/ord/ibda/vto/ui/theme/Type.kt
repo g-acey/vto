@@ -16,10 +16,20 @@ val provider = GoogleFont.Provider(
     certificates = R.array.com_google_android_gms_fonts_certs
 )
 
+val bodyFontName = GoogleFont("Roboto")
+
 val bodyFontFamily = FontFamily(
     Font(
-        googleFont = GoogleFont("Roboto"),
+        googleFont = bodyFontName,
         fontProvider = provider,
+    )
+)
+
+val bodyFontFamilyMedium = FontFamily(
+    Font(
+        googleFont = bodyFontName,
+        fontProvider = provider,
+        weight = FontWeight.Medium
     )
 )
 
@@ -62,17 +72,17 @@ val baseline = Typography()
 val AppTypography = Typography(
     displayLarge = baseline.displayLarge.copy(fontFamily = fontFamilyBold),
     displayMedium = baseline.displayMedium.copy(fontFamily = fontFamilySemiBold),
-    displaySmall = baseline.displaySmall.copy(fontFamily = fontFamily),
+    displaySmall = baseline.displaySmall.copy(fontFamily = fontFamilySemiBold),
     headlineLarge = baseline.headlineLarge.copy(fontFamily = fontFamily),
     headlineMedium = baseline.headlineMedium.copy(fontFamily = fontFamilyMedium),
     headlineSmall = baseline.headlineSmall.copy(fontFamily = fontFamily),
-    titleLarge = baseline.titleLarge.copy(fontFamily = fontFamily),
-    titleMedium = baseline.titleMedium.copy(fontFamily = fontFamilyMedium),
-    titleSmall = baseline.titleSmall.copy(fontFamily = fontFamily),
+    titleLarge = baseline.titleLarge.copy(fontFamily = bodyFontFamily),
+    titleMedium = baseline.titleMedium.copy(fontFamily = bodyFontFamilyMedium),
+    titleSmall = baseline.titleSmall.copy(fontFamily = bodyFontFamily),
     bodyLarge = baseline.bodyLarge.copy(fontFamily = bodyFontFamily),
     bodyMedium = baseline.bodyMedium.copy(fontFamily = bodyFontFamily),
     bodySmall = baseline.bodySmall.copy(fontFamily = bodyFontFamily),
-    labelLarge = baseline.labelLarge.copy(fontFamily = bodyFontFamily),
-    labelMedium = baseline.labelMedium.copy(fontFamily = bodyFontFamily),
-    labelSmall = baseline.labelSmall.copy(fontFamily = bodyFontFamily),
+    labelLarge = baseline.labelLarge.copy(fontFamily = bodyFontFamilyMedium),
+    labelMedium = baseline.labelMedium.copy(fontFamily = bodyFontFamilyMedium),
+    labelSmall = baseline.labelSmall.copy(fontFamily = bodyFontFamilyMedium),
 )

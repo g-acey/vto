@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import ord.ibda.vto.ui.cartscreen.CartScreen
 import ord.ibda.vto.ui.loginscreen.LoginForm
 import ord.ibda.vto.ui.loginscreen.LoginScreen
 import ord.ibda.vto.ui.productdetailsscreen.ProductDetailsScreen
@@ -25,7 +26,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             AppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    ProductDetailsScreen(
+                    CartScreen(
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
