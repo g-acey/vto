@@ -18,13 +18,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,8 +32,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -44,30 +42,44 @@ import androidx.compose.ui.unit.sp
 import ord.ibda.vto.R
 import ord.ibda.vto.ui.theme.AppTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CartScreen(
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier
-            .fillMaxSize()
+    val sheetHeight = 150.dp
+
+    BottomSheetScaffold(
+        sheetShadowElevation = 3.dp,
+        sheetPeekHeight = sheetHeight,
+        sheetShape = RoundedCornerShape(0.dp),
+        sheetSwipeEnabled = false,
+        sheetDragHandle = {
+
+        },
+        sheetContent = {
+            ProcessOrder(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(sheetHeight)
+            )
+        },
+        sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        modifier = modifier.fillMaxSize()
     ) {
         Column(
             modifier = Modifier
+                .fillMaxSize()
         ) {
             CartTile(
                 modifier = Modifier
-                    .height(100.dp)
-                    .padding(horizontal = 20.dp, vertical = 20.dp)
+                    .padding(vertical = 20.dp, horizontal = 20.dp)
             )
-            Spacer(modifier = Modifier.height(25.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             CartItems(
                 modifier = Modifier
-                    .height(560.dp)
-            )
-            ProcessOrder(
-                modifier = Modifier
-                    .height(200.dp)
+                    .fillMaxWidth()
+                    .weight(1f) // allow scrolling space above the sheet
             )
         }
     }
@@ -78,7 +90,7 @@ fun CartTile(
     modifier: Modifier = Modifier
 ) {
     Row(
-        verticalAlignment = Alignment.Bottom,
+        verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth()
     ) {
@@ -86,14 +98,14 @@ fun CartTile(
             text = "Cart",
             style = MaterialTheme.typography.displaySmall,
             modifier = Modifier
-                .weight(1f)
-                .padding(top = 20.dp)
+                .weight(1.2f)
         )
         Text(
             text = "(3)",
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier
                 .weight(3f)
+                .padding(top = 10.dp)
         )
     }
 }
@@ -275,13 +287,11 @@ fun ProcessOrder(
     modifier: Modifier = Modifier
 ) {
     Column(
+        verticalArrangement = Arrangement.Center,
         modifier = modifier
             .fillMaxWidth()
-            .shadow(
-                elevation = 5.dp
-            )
             .background(MaterialTheme.colorScheme.surfaceContainerLow)
-            .padding(horizontal = 20.dp, vertical = 20.dp)
+            .padding(horizontal = 20.dp)
     ) {
         TotalDetails(
             modifier = Modifier

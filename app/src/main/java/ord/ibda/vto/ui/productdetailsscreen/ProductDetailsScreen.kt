@@ -392,25 +392,6 @@ fun PartialBottomSheet(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun BottomSheet(
-    modifier: Modifier = Modifier
-) {
-    val sheetState = rememberModalBottomSheetState()
-    val scope = rememberCoroutineScope()
-    var showBottomSheet by remember { mutableStateOf(false) }
-
-    ModalBottomSheet(
-        onDismissRequest = {
-            showBottomSheet = false
-        },
-        sheetState = sheetState
-    ) {
-
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 fun ProductDetailsScreenPreview() {
