@@ -66,20 +66,17 @@ fun CartScreen(
         },
         sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
         modifier = modifier.fillMaxSize()
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
+    ) { innerPadding ->
+        Column {
             CartTile(
                 modifier = Modifier
-                    .padding(vertical = 20.dp, horizontal = 20.dp)
+                    .padding(top = 20.dp, start = 20.dp, end = 20.dp)
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             CartItems(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f) // allow scrolling space above the sheet
+                    .fillMaxSize()
+                    .padding(innerPadding)
             )
         }
     }
@@ -124,12 +121,13 @@ fun CartItems(
 ) {
     val cartList = listOf(
         CartItem(R.drawable.black_tank, "T12 Tank top", "XS", 2, 499.900),
+        CartItem(R.drawable.red_offshoulder, "T12 Tank top", "XS", 1, 499.900),
+        CartItem(R.drawable.red_offshoulder, "T12 Tank top", "XS", 1, 499.900),
         CartItem(R.drawable.red_offshoulder, "T12 Tank top", "XS", 1, 499.900)
     )
 
     LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(20.dp),
-        modifier = modifier.padding(horizontal = 20.dp)
+        modifier = modifier
     ) {
         items(cartList) { item ->
             CartItemRow(item)
@@ -142,8 +140,10 @@ fun CartItemRow(
     item: CartItem
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 16.dp)
     ) {
         Box(
             modifier = Modifier

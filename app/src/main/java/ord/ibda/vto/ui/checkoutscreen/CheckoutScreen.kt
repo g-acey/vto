@@ -6,10 +6,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,11 +18,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.NavigateNext
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
@@ -32,7 +27,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,55 +36,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ord.ibda.vto.R
 import ord.ibda.vto.ui.cartscreen.CartItem
 import ord.ibda.vto.ui.theme.AppTheme
-
-//@OptIn(ExperimentalMaterial3Api::class)
-//@Composable
-//fun CheckoutScreen(
-//    modifier: Modifier = Modifier
-//) {
-//    val sheetHeight = 100.dp
-//
-//    BottomSheetScaffold(
-//        sheetShadowElevation = 3.dp,
-//        sheetPeekHeight = sheetHeight,
-//        sheetShape = RoundedCornerShape(0.dp),
-//        sheetSwipeEnabled = false,
-//        sheetDragHandle = {
-//
-//        },
-//        sheetContent = {
-//            PayOrder(
-//                modifier = Modifier
-//                    .height(sheetHeight)
-//            )
-//        },
-//        sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-//        modifier = modifier.fillMaxSize()
-//    ) {
-//        Column(
-//            modifier = Modifier
-//                .fillMaxSize()
-//        ) {
-//            CheckoutHeader()
-//            AddressColumn()
-//            Divider()
-//            PaymentColumn()
-//            Divider()
-//            CartItems()
-//            Divider()
-//            PromoColumn()
-//            Divider()
-//            OrderSummary()
-//        }
-//    }
-//}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -105,11 +56,12 @@ fun CheckoutScreen(
     )
 
     BottomSheetScaffold(
-        sheetShadowElevation = 3.dp,
+        sheetShadowElevation = 10.dp,
+        sheetTonalElevation = 6.dp,
         sheetPeekHeight = sheetHeight,
         sheetShape = RoundedCornerShape(0.dp),
         sheetSwipeEnabled = false,
-        sheetDragHandle = {},
+        sheetDragHandle = { },
         sheetContent = {
             PayOrder(
                 modifier = Modifier
@@ -172,8 +124,8 @@ fun PayOrder(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceContainerLow)
             .padding(horizontal = 20.dp)
+            .background(MaterialTheme.colorScheme.surfaceContainerLow)
     ) {
         Column(
             modifier = Modifier
@@ -193,7 +145,7 @@ fun PayOrder(
         }
         Spacer(modifier = Modifier.width(50.dp))
         Button(
-            onClick = {  },
+            onClick = { },
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onPrimaryContainer),
             shape = RoundedCornerShape(4.dp),
             modifier = Modifier
@@ -327,7 +279,7 @@ fun OrderSummary(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 16.dp)
+            .padding(start = 20.dp, end = 20.dp, top = 16.dp)
     ) {
         Text(
             text = "Order Summary",
