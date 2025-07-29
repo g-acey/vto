@@ -14,8 +14,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import ord.ibda.vto.ui.cartscreen.CartScreen
 import ord.ibda.vto.ui.checkoutscreen.CheckoutScreen
 import ord.ibda.vto.ui.editprofilescreen.EditProfileScreen
+import ord.ibda.vto.ui.homescreen.HomeScreen
 import ord.ibda.vto.ui.loginscreen.LoginForm
 import ord.ibda.vto.ui.loginscreen.LoginScreen
+import ord.ibda.vto.ui.myordersscreen.MyOrdersScreen
 import ord.ibda.vto.ui.productdetailsscreen.ProductDetailsScreen
 import ord.ibda.vto.ui.profilescreen.ProfileScreen
 import ord.ibda.vto.ui.signupscreen.SignUpScreen
@@ -29,7 +31,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             AppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    EditProfileScreen(
+                    HomeScreen(
                         modifier = Modifier.padding(innerPadding)
                     )
                 }

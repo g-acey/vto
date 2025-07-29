@@ -21,13 +21,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.NavigateNext
-import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -43,33 +43,19 @@ import ord.ibda.vto.R
 import ord.ibda.vto.ui.cartscreen.CartItem
 import ord.ibda.vto.ui.theme.AppTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CheckoutScreen(
     modifier: Modifier = Modifier
 ) {
-    val sheetHeight = 100.dp
-
     val cartList = listOf(
         CartItem(R.drawable.black_tank, "T12 Tank top", "XS", 2, 499.900),
         CartItem(R.drawable.red_offshoulder, "T12 Tank top", "XS", 1, 499.900)
     )
 
-    BottomSheetScaffold(
-        sheetShadowElevation = 10.dp,
-        sheetTonalElevation = 6.dp,
-        sheetPeekHeight = sheetHeight,
-        sheetShape = RoundedCornerShape(0.dp),
-        sheetSwipeEnabled = false,
-        sheetDragHandle = { },
-        sheetContent = {
-            PayOrder(
-                modifier = Modifier
-                    .height(sheetHeight)
-            )
-        },
-        sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-        modifier = modifier.fillMaxSize()
+    Scaffold(
+        bottomBar = {
+            PayOrder()
+        }
     ) { innerPadding ->
         Column {
             CheckoutHeader()
@@ -120,48 +106,53 @@ fun CheckoutScreen(
 fun PayOrder(
     modifier: Modifier = Modifier
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
+    Surface(
+        tonalElevation = 6.dp,
+        shadowElevation = 8.dp,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .background(MaterialTheme.colorScheme.surfaceContainerLow)
     ) {
-        Column(
-            modifier = Modifier
-        ) {
-            Text(
-                text = "Total",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier
-                    .padding(top = 5.dp)
-            )
-            Text(
-                text = "1.049.800 IDR",
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier
-                    .padding(top = 5.dp)
-            )
-        }
-        Spacer(modifier = Modifier.width(50.dp))
-        Button(
-            onClick = { },
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onPrimaryContainer),
-            shape = RoundedCornerShape(4.dp),
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(53.dp)
+                .padding(horizontal = 20.dp, vertical = 16.dp)
         ) {
-            Text(
-                text = "Pay",
-                color = MaterialTheme.colorScheme.onPrimary,
-                style = MaterialTheme.typography.labelLarge,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.SemiBold
-            )
+            Column {
+                Text(
+                    text = "Total",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = "1.049.800 IDR",
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
+
+            Spacer(modifier = Modifier.width(50.dp))
+
+            Button(
+                onClick = { },
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onPrimaryContainer),
+                shape = RoundedCornerShape(4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(53.dp)
+            ) {
+                Text(
+                    text = "Pay",
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
         }
     }
 }
+
 
 @Composable
 fun CheckoutHeader(
@@ -176,7 +167,9 @@ fun CheckoutHeader(
         Icon(
             imageVector = Icons.Default.ArrowBack,
             contentDescription = "Back",
-            modifier = Modifier.size(32.dp)
+            modifier = Modifier
+                .size(32.dp)
+                .clickable {  }
         )
         Spacer(modifier = Modifier.width(24.dp))
         Text(
@@ -279,7 +272,7 @@ fun OrderSummary(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = 20.dp, end = 20.dp, top = 16.dp)
+            .padding(horizontal = 20.dp, vertical = 16.dp)
     ) {
         Text(
             text = "Order Summary",

@@ -20,14 +20,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -42,30 +42,14 @@ import androidx.compose.ui.unit.sp
 import ord.ibda.vto.R
 import ord.ibda.vto.ui.theme.AppTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CartScreen(
     modifier: Modifier = Modifier
 ) {
-    val sheetHeight = 150.dp
-
-    BottomSheetScaffold(
-        sheetShadowElevation = 3.dp,
-        sheetPeekHeight = sheetHeight,
-        sheetShape = RoundedCornerShape(0.dp),
-        sheetSwipeEnabled = false,
-        sheetDragHandle = {
-
-        },
-        sheetContent = {
-            ProcessOrder(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(sheetHeight)
-            )
-        },
-        sheetContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-        modifier = modifier.fillMaxSize()
+    Scaffold(
+        bottomBar = {
+            ProcessOrder()
+        }
     ) { innerPadding ->
         Column {
             CartTile(
@@ -286,32 +270,41 @@ fun TotalDetails(
 fun ProcessOrder(
     modifier: Modifier = Modifier
 ) {
-    Column(
-        verticalArrangement = Arrangement.Center,
+    Surface(
+        tonalElevation = 6.dp,
+        shadowElevation = 8.dp,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
         modifier = modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceContainerLow)
-            .padding(horizontal = 20.dp)
     ) {
-        TotalDetails(
-            modifier = Modifier
-                .padding(bottom = 30.dp)
-        )
-        Button(
-            onClick = {  },
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onPrimaryContainer),
-            shape = RoundedCornerShape(4.dp),
-            modifier = Modifier
+        Column(
+            verticalArrangement = Arrangement.Center,
+            modifier = modifier
                 .fillMaxWidth()
-                .height(53.dp)
+                .height(150.dp)
+                .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                .padding(horizontal = 20.dp)
         ) {
-            Text(
-                text = "Process Order",
-                color = MaterialTheme.colorScheme.onPrimary,
-                style = MaterialTheme.typography.labelLarge,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.SemiBold
+            TotalDetails(
+                modifier = Modifier
+                    .padding(bottom = 30.dp)
             )
+            Button(
+                onClick = { },
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onPrimaryContainer),
+                shape = RoundedCornerShape(4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(53.dp)
+            ) {
+                Text(
+                    text = "Process Order",
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    style = MaterialTheme.typography.labelLarge,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
         }
     }
 }
