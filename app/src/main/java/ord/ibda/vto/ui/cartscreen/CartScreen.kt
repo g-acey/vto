@@ -276,14 +276,15 @@ fun ProcessOrder(
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         modifier = modifier
             .fillMaxWidth()
+            .height(160.dp)
     ) {
         Column(
-            verticalArrangement = Arrangement.Center,
+            verticalArrangement = Arrangement.Top,
             modifier = modifier
                 .fillMaxWidth()
                 .height(150.dp)
                 .background(MaterialTheme.colorScheme.surfaceContainerLow)
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = 20.dp, vertical = 14.dp)
         ) {
             TotalDetails(
                 modifier = Modifier

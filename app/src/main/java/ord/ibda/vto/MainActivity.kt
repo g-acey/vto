@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -12,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import ord.ibda.vto.ui.cartscreen.CartScreen
+import ord.ibda.vto.ui.checkoutscreen.CheckoutHeader
 import ord.ibda.vto.ui.checkoutscreen.CheckoutScreen
 import ord.ibda.vto.ui.editprofilescreen.EditProfileScreen
 import ord.ibda.vto.ui.homescreen.HomeScreen
@@ -22,6 +24,9 @@ import ord.ibda.vto.ui.productdetailsscreen.ProductDetailsScreen
 import ord.ibda.vto.ui.profilescreen.ProfileScreen
 import ord.ibda.vto.ui.signupscreen.SignUpScreen
 import ord.ibda.vto.ui.theme.AppTheme
+import ord.ibda.vto.ui.vtoscreen.VtoHeader
+import ord.ibda.vto.ui.vtoscreen.VtoScreen
+import ord.ibda.vto.ui.vtoscreen.VtoScreenPreview
 import ord.ibda.vto.ui.welcomescreen.WelcomeScreen
 
 class MainActivity : ComponentActivity() {
@@ -30,10 +35,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             AppTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    HomeScreen(
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                Box(modifier = Modifier.fillMaxSize()) {
+                    VtoScreen()
                 }
             }
         }
