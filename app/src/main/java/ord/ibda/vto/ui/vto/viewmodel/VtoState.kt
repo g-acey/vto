@@ -1,0 +1,4 @@
+package ord.ibda.vto.ui.vto.viewmodel
+
+class VtoState {
+}

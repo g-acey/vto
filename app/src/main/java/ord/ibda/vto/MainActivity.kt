@@ -6,29 +6,15 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import ord.ibda.vto.ui.cartscreen.CartScreen
-import ord.ibda.vto.ui.checkoutscreen.CheckoutHeader
-import ord.ibda.vto.ui.checkoutscreen.CheckoutScreen
-import ord.ibda.vto.ui.editprofilescreen.EditProfileScreen
-import ord.ibda.vto.ui.homescreen.HomeScreen
-import ord.ibda.vto.ui.loginscreen.LoginForm
-import ord.ibda.vto.ui.loginscreen.LoginScreen
-import ord.ibda.vto.ui.myordersscreen.MyOrdersScreen
-import ord.ibda.vto.ui.productdetailsscreen.ProductDetailsScreen
-import ord.ibda.vto.ui.profilescreen.ProfileScreen
-import ord.ibda.vto.ui.signupscreen.SignUpScreen
+import androidx.hilt.navigation.compose.hiltViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import ord.ibda.vto.ui.navigation.NavigationRoot
 import ord.ibda.vto.ui.theme.AppTheme
-import ord.ibda.vto.ui.vtoscreen.VtoHeader
-import ord.ibda.vto.ui.vtoscreen.VtoScreen
-import ord.ibda.vto.ui.vtoscreen.VtoScreenPreview
-import ord.ibda.vto.ui.welcomescreen.WelcomeScreen
+import ord.ibda.vto.ui.vto.VtoScreen
+import ord.ibda.vto.ui.vto.viewmodel.VtoViewModel
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,7 +22,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             AppTheme {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    VtoScreen()
+                    NavigationRoot()
                 }
             }
         }
