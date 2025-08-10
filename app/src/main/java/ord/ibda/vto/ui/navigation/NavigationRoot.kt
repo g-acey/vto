@@ -53,14 +53,20 @@ fun NavigationRoot(
                     NavEntry(
                         key = key
                     ) {
-                        SignUpScreen()
+                        SignUpScreen(goLogin = {
+                            backStack.removeLastOrNull()
+                        })
                     }
                 }
                 is LoginScreenNK -> {
                     NavEntry(
                         key = key
                     ) {
-                        LoginScreen()
+                        LoginScreen(
+                            goSignUp = {
+                                backStack.add(SignUpScreenNK)
+                            }
+                        )
                     }
                 }
                 else -> throw RuntimeException("Invalid Navkey.")

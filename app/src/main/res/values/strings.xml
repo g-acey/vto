@@ -13,4 +13,5 @@
     <string name="about_product_description2">There is currently no physical store available, but we have an upcoming branch in Indonesia soon.</string>
     <string name="about_product_title3">Deliveries and returns</string>
     <string name="about_product_description3">There are 2 shipping methods available; Express home (arrives within 1 to 2 business days) which cost around 30.000 IDR and Standard home (arrives within 1 to 3 business days) which cost around 15.000 IDR. For returns, kindly send us an email with prove of ur unboxing video and we will send instructions to process the return for you.</string>
+    <string name="login_error">* Incorrect username or password</string>
 </resources>

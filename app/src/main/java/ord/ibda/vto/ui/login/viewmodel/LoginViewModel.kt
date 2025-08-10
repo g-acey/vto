@@ -44,7 +44,9 @@ class LoginViewModel @Inject constructor(
                     if (user != null) {
                         _state.update { it.copy(
                             isError = false,
-                            isLoggedIn = true
+                            isLoggedIn = true,
+                            username = "",
+                            password = "",
                         ) }
                     } else {
                         _state.update { it.copy(
@@ -53,11 +55,6 @@ class LoginViewModel @Inject constructor(
                         ) }
                     }
                 }
-            }
-            LoginEvent.ShowError -> {
-                _state.update { it.copy(
-                    isError = true
-                ) }
             }
             LoginEvent.ClearValue -> {
                 _state.update { it.copy(

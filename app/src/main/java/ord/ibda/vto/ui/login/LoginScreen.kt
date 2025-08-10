@@ -50,6 +50,7 @@ import ord.ibda.vto.ui.theme.AppTheme
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
+    goSignUp: () -> Unit,
     loginViewModel: LoginViewModel = hiltViewModel()
 ) {
     val loginState by loginViewModel.state.collectAsState()
@@ -94,8 +95,9 @@ fun LoginScreen(
                 valueClear = { loginViewModel.onEvent(LoginEvent.ClearValue) },
                 isVisible = loginState.isPasswordVisible,
                 changeVisibility = { loginViewModel.onEvent(LoginEvent.ChangePasswordVisibility) },
+                isError = loginState.isError,
                 submitForm= { loginViewModel.onEvent(LoginEvent.UserLogin) },
-                clickText= {  },
+                clickText= { goSignUp() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(800.dp)
@@ -117,6 +119,7 @@ fun LoginBottomSheet(
     valueClear: () -> Unit,
     isVisible: Boolean,
     changeVisibility: () -> Unit,
+    isError: Boolean,
     submitForm: () -> Unit,
     clickText: () -> Unit,
     modifier: Modifier = Modifier
@@ -131,7 +134,7 @@ fun LoginBottomSheet(
                 .padding(bottom = 60.dp)
         ) {
             Text(
-                text = "Let's sign you in",
+                text = "Let's log you in",
                 style = MaterialTheme.typography.headlineMedium,
             )
             LoginForm(
@@ -142,6 +145,7 @@ fun LoginBottomSheet(
                 valueClear = valueClear,
                 isVisible = isVisible,
                 changeVisibility = changeVisibility,
+                isError = isError,
                 submitForm = submitForm,
                 modifier = Modifier
                     .padding(horizontal = 20.dp)
@@ -171,13 +175,19 @@ fun PasswordInputForm(
     valueChange: (String) -> Unit,
     isVisible: Boolean,
     changeVisibility: () -> Unit,
+    isError: Boolean,
     label: String,
     modifier: Modifier = Modifier
 ) {
     OutlinedTextField(
         value = value,
-        onValueChange = { valueChange },
+        onValueChange = valueChange,
         label = { Text(text = label) },
+        isError = isError,
+        supportingText = {
+            if (isError) {
+                Text(text = stringResource(R.string.login_error))
+            } },
         singleLine = true,
         maxLines = 1,
         visualTransformation = if (isVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -187,7 +197,7 @@ fun PasswordInputForm(
                     Icons.Default.Visibility
                 else Icons.Default.VisibilityOff
 
-                IconButton(onClick = { changeVisibility }) {
+                IconButton(onClick = { changeVisibility() }) {
                     Icon(imageVector = image, contentDescription = if (isVisible) "Hide password" else "Show password")
                 }
             }
@@ -205,6 +215,7 @@ fun LoginForm(
     valueClear: () -> Unit,
     isVisible: Boolean,
     changeVisibility: () -> Unit,
+    isError: Boolean,
     submitForm: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -217,6 +228,7 @@ fun LoginForm(
             valueChange = usernameChange,
             valueClear = valueClear,
             label = "Username",
+            isError = isError,
             modifier = Modifier
                 .fillMaxWidth()
         )
@@ -228,6 +240,7 @@ fun LoginForm(
                 valueChange = passwordChange,
                 isVisible = isVisible,
                 changeVisibility = changeVisibility,
+                isError = isError,
                 label = "Password",
                 modifier = Modifier
                     .fillMaxWidth()
@@ -251,7 +264,7 @@ fun LoginForm(
                 .height(53.dp)
         ) {
             Text(
-                text = "Sign up",
+                text = "Login",
                 color = MaterialTheme.colorScheme.onPrimary,
                 style = MaterialTheme.typography.labelLarge,
                 fontSize = 20.sp,
@@ -265,6 +278,6 @@ fun LoginForm(
 @Composable
 fun LoginScreenPreview() {
     AppTheme {
-        LoginScreen()
+        LoginScreen(goSignUp = {})
     }
 }

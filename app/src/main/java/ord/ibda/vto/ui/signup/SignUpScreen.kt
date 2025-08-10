@@ -26,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,15 +42,22 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import ord.ibda.vto.R
+import ord.ibda.vto.ui.signup.viewmodel.SignUpEvent
+import ord.ibda.vto.ui.signup.viewmodel.SignUpViewModel
 import ord.ibda.vto.ui.theme.AppTheme
 
 
 @Composable
 fun SignUpScreen(
-//    signUpViewModel: signUpViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    goLogin: () -> Unit,
+    signUpViewModel: SignUpViewModel = hiltViewModel()
 ) {
+    val signUpState by signUpViewModel.state.collectAsState()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -82,17 +90,26 @@ fun SignUpScreen(
                         .padding(start = 5.dp)
                 )
             }
-//            SignUpBottomSheet(
-//                submitForm= {},
-//                clickText= {},
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .height(800.dp)
-//                    .shadow(
-//                        elevation = 5.dp
-//                    )
-//                    .background(color = MaterialTheme.colorScheme.surfaceContainerLow)
-//            )
+            SignUpBottomSheet(
+                usernameValue = signUpState.username,
+                passwordValue = signUpState.password,
+                usernameChange = { signUpViewModel.onEvent(SignUpEvent.InputUsername(it)) },
+                passwordChange = { signUpViewModel.onEvent(SignUpEvent.InputPassword(it)) },
+                valueClear = { signUpViewModel.onEvent(SignUpEvent.ClearValue) },
+                isVisible = signUpState.isPasswordVisible,
+                changeVisibility = { signUpViewModel.onEvent(SignUpEvent.ChangePasswordVisibility) },
+                isErrorUsername = signUpState.isErrorUsername,
+                isErrorPassword = signUpState.isErrorPassword,
+                submitForm= { signUpViewModel.onEvent(SignUpEvent.UserSignUp) },
+                clickText= { goLogin() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(800.dp)
+                    .shadow(
+                        elevation = 5.dp
+                    )
+                    .background(color = MaterialTheme.colorScheme.surfaceContainerLow)
+            )
         }
     }
 }
@@ -106,6 +123,8 @@ fun SignUpBottomSheet(
     valueClear: () -> Unit,
     isVisible: Boolean,
     changeVisibility: () -> Unit,
+    isErrorPassword: Boolean,
+    isErrorUsername: Boolean,
     submitForm: () -> Unit,
     clickText: () -> Unit,
     modifier: Modifier = Modifier
@@ -131,6 +150,8 @@ fun SignUpBottomSheet(
                 valueClear = valueClear,
                 isVisible = isVisible,
                 changeVisibility = changeVisibility,
+                isErrorPassword = isErrorPassword,
+                isErrorUsername = isErrorUsername,
                 submitForm = submitForm,
                 modifier = Modifier
                     .padding(horizontal = 20.dp)
@@ -147,7 +168,7 @@ fun SignUpBottomSheet(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
-                        .clickable { clickText }
+                        .clickable { clickText() }
                 )
             }
         }
@@ -159,27 +180,31 @@ fun TextInputForm(
     value: String,
     valueChange: (String) -> Unit,
     valueClear: () -> Unit,
+    isError: Boolean,
+    supportingText: @Composable () -> Unit = {},
     label: String,
     modifier: Modifier = Modifier
 ) {
       OutlinedTextField(
-        value = value,
-        onValueChange = { valueChange },
-        singleLine = true,
-        maxLines = 1,
-        label = { Text(label) },
-        trailingIcon = {
-            if (value.isNotEmpty()) {
-                IconButton(onClick = { valueClear() }) {
-                    Icon(
-                        imageVector = Icons.Default.Clear,
-                        contentDescription = "Clear text"
-                    )
-                }
-            }
-        },
-        modifier = modifier
-    )
+          value = value,
+          onValueChange = valueChange,
+          singleLine = true,
+          isError = isError,
+          supportingText = supportingText,
+          maxLines = 1,
+          label = { Text(label) },
+          trailingIcon = {
+              if (value.isNotEmpty()) {
+                  IconButton(onClick = { valueClear() }) {
+                      Icon(
+                          imageVector = Icons.Default.Clear,
+                          contentDescription = "Clear text"
+                      )
+                  }
+              }
+                         },
+          modifier = modifier
+      )
 }
 
 @Composable
@@ -188,14 +213,16 @@ fun PasswordInputForm(
     valueChange: (String) -> Unit,
     isVisible: Boolean,
     changeVisibility: () -> Unit,
+    isError: Boolean,
     label: String,
     supportingText: String = "",
     modifier: Modifier = Modifier
 ) {
     OutlinedTextField(
         value = value,
-        onValueChange = { valueChange },
+        onValueChange = valueChange,
         label = { Text(text = label) },
+        isError = isError,
         supportingText = { Text(text = supportingText) },
         singleLine = true,
         maxLines = 1,
@@ -222,6 +249,8 @@ fun SignUpForm(
     usernameChange: (String) -> Unit,
     passwordChange: (String) -> Unit,
     valueClear: () -> Unit,
+    isErrorPassword: Boolean,
+    isErrorUsername: Boolean,
     isVisible: Boolean,
     changeVisibility: () -> Unit,
     submitForm: () -> Unit,
@@ -236,6 +265,8 @@ fun SignUpForm(
             valueChange = usernameChange,
             valueClear = valueClear,
             label = "Username",
+            isError = isErrorUsername,
+            supportingText = { if (isErrorUsername) { Text(text = "* Username already taken") } },
             modifier = Modifier
                 .fillMaxWidth()
         )
@@ -244,8 +275,9 @@ fun SignUpForm(
             valueChange = passwordChange,
             isVisible = isVisible,
             changeVisibility = changeVisibility,
+            isError = isErrorPassword,
             label = "Password",
-            stringResource(R.string.password_criteria),
+            supportingText =  stringResource(R.string.password_criteria),
             modifier = Modifier
                 .fillMaxWidth()
         )
@@ -272,6 +304,6 @@ fun SignUpForm(
 @Composable
 fun SignUpScreenPreview() {
     AppTheme {
-        SignUpScreen()
+        SignUpScreen(goLogin = {})
     }
 }
