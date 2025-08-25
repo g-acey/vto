@@ -1,7 +1,9 @@
 package ord.ibda.vto.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
@@ -10,7 +12,12 @@ import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
 import kotlinx.serialization.Serializable
+import ord.ibda.vto.ui.home.HomeScreen
 import ord.ibda.vto.ui.login.LoginScreen
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import ord.ibda.vto.ui.component.LoadingScreen
+import ord.ibda.vto.ui.session.viewmodel.SessionViewModel
 import ord.ibda.vto.ui.signup.SignUpScreen
 import ord.ibda.vto.ui.welcome.WelcomeScreen
 
@@ -23,11 +30,29 @@ data object SignUpScreenNK: NavKey
 @Serializable
 data object LoginScreenNK: NavKey
 
+@Serializable
+data object HomeScreenNK: NavKey
+
 @Composable
 fun NavigationRoot(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    sessionViewModel: SessionViewModel = hiltViewModel()
 ) {
-    val backStack = rememberNavBackStack(WelcomeScreenNK)
+    val loggedInUserId by sessionViewModel.loggedInUserId.collectAsState(initial = null)
+
+    if (loggedInUserId == null) {
+        LoadingScreen()
+        return
+    }
+
+    val startDestination = if (loggedInUserId != null) {
+        HomeScreenNK
+    } else {
+        WelcomeScreenNK
+    }
+
+    val backStack = rememberNavBackStack(startDestination)
+
     NavDisplay(
         modifier = modifier,
         backStack = backStack,
@@ -53,9 +78,14 @@ fun NavigationRoot(
                     NavEntry(
                         key = key
                     ) {
-                        SignUpScreen(goLogin = {
-                            backStack.removeLastOrNull()
-                        })
+                        SignUpScreen(
+                            onSignUpSuccess = { userId ->
+                                sessionViewModel.login(userId)
+                                backStack.clear()
+                                backStack.add(HomeScreenNK)
+                            },
+                            goLogin = { backStack.removeLastOrNull() }
+                        )
                     }
                 }
                 is LoginScreenNK -> {
@@ -63,10 +93,20 @@ fun NavigationRoot(
                         key = key
                     ) {
                         LoginScreen(
-                            goSignUp = {
-                                backStack.add(SignUpScreenNK)
-                            }
+                            onLoginSuccess = { userId ->
+                                sessionViewModel.login(userId)
+                                backStack.clear()
+                                backStack.add(HomeScreenNK)
+                            },
+                            goSignUp = { backStack.add(SignUpScreenNK) }
                         )
+                    }
+                }
+                is HomeScreenNK -> {
+                    NavEntry(
+                        key = key
+                    ) {
+                        HomeScreen()
                     }
                 }
                 else -> throw RuntimeException("Invalid Navkey.")
@@ -74,3 +114,6 @@ fun NavigationRoot(
         }
     )
 }
+
+
+

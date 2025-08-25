@@ -41,7 +41,7 @@ class SignUpViewModel @Inject constructor(
                     username = event.username
                 ) }
             }
-            SignUpEvent.UserSignUp -> {
+            is SignUpEvent.UserSignUp -> {
                 val username = _state.value.username.trim()
                 val password = _state.value.password
 
@@ -68,13 +68,13 @@ class SignUpViewModel @Inject constructor(
                     }
 
                     if (isValid) {
-                        userDao.insertUser(UserTable(username = username, password = password))
+                        val newUserId = userDao.insertUser(UserTable(username = username, password = password)).toInt()
                         _state.update { it.copy(
-                            signUpSuccess = true,
+//                            signUpSuccess = true,
                             username = "",
                             password = ""
                         ) }
-
+                        event.onSuccess(newUserId)
                     }
                 }
             }

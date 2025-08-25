@@ -53,6 +53,7 @@ import ord.ibda.vto.ui.theme.AppTheme
 @Composable
 fun SignUpScreen(
     modifier: Modifier = Modifier,
+    onSignUpSuccess: (Int) -> Unit,
     goLogin: () -> Unit,
     signUpViewModel: SignUpViewModel = hiltViewModel()
 ) {
@@ -100,7 +101,9 @@ fun SignUpScreen(
                 changeVisibility = { signUpViewModel.onEvent(SignUpEvent.ChangePasswordVisibility) },
                 isErrorUsername = signUpState.isErrorUsername,
                 isErrorPassword = signUpState.isErrorPassword,
-                submitForm= { signUpViewModel.onEvent(SignUpEvent.UserSignUp) },
+                submitForm= { signUpViewModel.onEvent(SignUpEvent.UserSignUp{ userId ->
+                    onSignUpSuccess(userId)
+                }) },
                 clickText= { goLogin() },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -304,6 +307,6 @@ fun SignUpForm(
 @Composable
 fun SignUpScreenPreview() {
     AppTheme {
-        SignUpScreen(goLogin = {})
+        SignUpScreen(onSignUpSuccess = {}, goLogin = {})
     }
 }

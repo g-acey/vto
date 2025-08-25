@@ -35,8 +35,8 @@ class LoginViewModel @Inject constructor(
                     isPasswordVisible = !_state.value.isPasswordVisible
                 ) }
             }
-            LoginEvent.UserLogin -> {
-                val username = _state.value.username
+            is LoginEvent.UserLogin -> {
+                val username = _state.value.username.trim()
                 val password = _state.value.password
 
                 viewModelScope.launch {
@@ -44,14 +44,15 @@ class LoginViewModel @Inject constructor(
                     if (user != null) {
                         _state.update { it.copy(
                             isError = false,
-                            isLoggedIn = true,
+//                            isLoggedIn = true,
                             username = "",
                             password = "",
                         ) }
+                        event.onSuccess(user.id)
                     } else {
                         _state.update { it.copy(
                             isError = true,
-                            isLoggedIn = false
+//                            isLoggedIn = false
                         ) }
                     }
                 }

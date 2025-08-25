@@ -10,7 +10,7 @@ import ord.ibda.vto.data.models.rooms.UserTable
 interface UserDao {
 
     @Insert
-    suspend fun insertUser(userTable: UserTable)
+    suspend fun insertUser(userTable: UserTable): Long
 
     @Query("SELECT * FROM UserTable WHERE username = :username AND password = :password LIMIT 1")
     suspend fun getUserByUsernameAndPassword(username: String, password: String): UserTable?

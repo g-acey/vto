@@ -6,5 +6,5 @@ data class SignUpState(
     val isPasswordVisible: Boolean = false,
     val isErrorPassword: Boolean = false,
     val isErrorUsername: Boolean = false,
-    val signUpSuccess: Boolean = false
+//    val signUpSuccess: Boolean = false
 )
