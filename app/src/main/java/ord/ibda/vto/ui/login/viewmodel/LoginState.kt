@@ -1,6 +1,6 @@
 package ord.ibda.vto.ui.login.viewmodel
 
-data class LoginState (
+data class LoginState(
     val username: String = "",
     val password: String = "",
     val isPasswordVisible: Boolean = false,

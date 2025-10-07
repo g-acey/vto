@@ -8,6 +8,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import ord.ibda.vto.data.db.AppDatabase
+import ord.ibda.vto.data.db.ProductDao
 import ord.ibda.vto.data.db.UserDao
 import javax.inject.Singleton
 
@@ -22,10 +23,16 @@ class DatabaseModule {
             appContext,
             AppDatabase::class.java,
             "APP_DATABASE"
-        ).build()
+        )
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     @Provides
     @Singleton
     fun provideUserDao(appDatabase: AppDatabase): UserDao = appDatabase.userDao()
+
+    @Provides
+    @Singleton
+    fun provideProductDao(appDatabase: AppDatabase): ProductDao = appDatabase.productDao()
 }

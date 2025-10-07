@@ -1,9 +1,11 @@
 package ord.ibda.vto.ui.home
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -52,6 +54,7 @@ import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,6 +64,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
@@ -69,24 +73,30 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import ord.ibda.vto.R
+import ord.ibda.vto.data.models.ProductType
+import ord.ibda.vto.data.models.rooms.ProductTable
+import ord.ibda.vto.ui.home.viewmodel.HomeEvent
+import ord.ibda.vto.ui.home.viewmodel.HomeViewModel
 import ord.ibda.vto.ui.theme.AppTheme
 
 @Composable
 fun HomeScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    goProfile: () -> Unit,
+    bottomBar: @Composable () -> Unit = {},
+    homeViewModel: HomeViewModel = hiltViewModel()
 ) {
-    var selectedItem by remember { mutableStateOf(0) }
+    val homeState by homeViewModel.state.collectAsState()
+
+//    var selectedItem by remember { mutableStateOf(0) }
 
     Scaffold(
         modifier = modifier,
-        bottomBar = {
-            HomeBottomBar(
-                selectedItem = selectedItem,
-                onItemSelected = { selectedItem = it },
-                cartItemCount = 3
-            )
-        }
+        bottomBar = { bottomBar() }
     ) { contentPadding ->
         Column(
             modifier = Modifier
@@ -94,17 +104,28 @@ fun HomeScreen(
                 .padding(contentPadding)
                 .background(MaterialTheme.colorScheme.surfaceContainerLow)
         ) {
-            TopBar()
+            TopBar(
+                goProfile = { goProfile() }
+            )
             Spacer(modifier = Modifier.height(20.dp))
-            HorizontalTabRow()
+            HorizontalTabRow(
+                selectedType = homeState.productType,
+                onTabSelected = { type ->
+                    homeViewModel.onEvent(HomeEvent.SortProducts(type))
+                }
+            )
             Spacer(modifier = Modifier.height(20.dp))
-            ProductCatalog()
+            ProductCatalog(
+                products = homeState.products
+            )
         }
     }
 }
 
 @Composable
-fun TopBar() {
+fun TopBar(
+    goProfile: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth(),
@@ -135,7 +156,7 @@ fun TopBar() {
                 )
         ) {
             IconButton(
-                onClick = { /* Profile action */ },
+                onClick = { goProfile() },
                 modifier = Modifier
                     .height(55.dp)
                     .background(MaterialTheme.colorScheme.surface)
@@ -149,18 +170,69 @@ fun TopBar() {
     }
 }
 
+//@Composable
+//fun HorizontalTabRow(
+//    modifier: Modifier = Modifier
+//) {
+//    val tabs = listOf("All", "Sports", "Teen", "Summer", "Casual")
+//    var selectedTabIndex by remember { mutableStateOf(0) }
+//
+//    ScrollableTabRow(
+//        selectedTabIndex = selectedTabIndex,
+//        containerColor = Color.Transparent,
+//        contentColor = MaterialTheme.colorScheme.onSurface,
+//        edgePadding = 20.dp,
+//        indicator = { tabPositions ->
+//            TabRowDefaults.Indicator(
+//                color = MaterialTheme.colorScheme.onSecondaryContainer,
+//                modifier = Modifier
+//                    .tabIndicatorOffset(tabPositions[selectedTabIndex])
+//                    .height(1.dp)
+//            )
+//        },
+//        divider = {},
+//        modifier = modifier
+//    ) {
+//        tabs.forEachIndexed { index, tab ->
+//            Tab(
+//                text = {
+//                    Text(
+//                        text = tab,
+//                        style = MaterialTheme.typography.labelLarge.copy(
+//                            fontSize = 16.sp
+//                        ),
+//                        maxLines = 1,
+//                        overflow = TextOverflow.Ellipsis
+//                    )
+//                },
+//                selected = selectedTabIndex == index,
+//                onClick = { selectedTabIndex = index }
+//            )
+//        }
+//    }
+//}
+
 @Composable
 fun HorizontalTabRow(
+    selectedType: ProductType,
+    onTabSelected: (ProductType) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val tabs = listOf("All", "Sports", "Teen", "Summer", "Casual")
-    var selectedTabIndex by remember { mutableStateOf(0) }
+    val tabs = listOf(
+        ProductType.ALL,
+        ProductType.SPORTS,
+        ProductType.TEEN,
+        ProductType.SUMMER,
+        ProductType.CASUAL
+    )
+
+    var selectedTabIndex = tabs.indexOf(selectedType)
 
     ScrollableTabRow(
         selectedTabIndex = selectedTabIndex,
         containerColor = Color.Transparent,
         contentColor = MaterialTheme.colorScheme.onSurface,
-        edgePadding = 20.dp, // matches your horizontal padding
+        edgePadding = 20.dp,
         indicator = { tabPositions ->
             TabRowDefaults.Indicator(
                 color = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -176,7 +248,7 @@ fun HorizontalTabRow(
             Tab(
                 text = {
                     Text(
-                        text = tab,
+                        text = tab.name.lowercase().replaceFirstChar { it.uppercase() },
                         style = MaterialTheme.typography.labelLarge.copy(
                             fontSize = 16.sp
                         ),
@@ -185,7 +257,7 @@ fun HorizontalTabRow(
                     )
                 },
                 selected = selectedTabIndex == index,
-                onClick = { selectedTabIndex = index }
+                onClick = { onTabSelected(tab) }
             )
         }
     }
@@ -347,185 +419,151 @@ fun SimpleSearchBar(
 
 @Composable
 fun ProductCatalog(
+    products: List<ProductTable>,
     modifier: Modifier = Modifier
 ) {
-    val products = listOf(
-        Product(R.drawable.flowy_white_shirt, "D23 Ripped denim shorts", "499.900 IDR"),
-        Product(R.drawable.flowy_pattern_shirt, "D22 Denim shorts", "599.900 IDR"),
-        Product(R.drawable.flowy_pattern_shirt, "D23 Ripped denim shorts", "499.900 IDR"),
-        Product(R.drawable.flowy_white_shirt, "D22 Denim shorts", "599.900 IDR")
-    )
-
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        modifier = modifier
-            .fillMaxSize()
-            .padding(horizontal = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(vertical = 16.dp)
-    ) {
-        // Full-width item (spans 2 columns)
-        item(span = { GridItemSpan(2) }) {
-            BigProductCard(
-                modifier = Modifier.fillMaxWidth()
+//    val products = listOf(
+//        Product(R.drawable.flowy_white_shirt, "D23 Ripped denim shorts", "499.900 IDR"),
+//        Product(R.drawable.flowy_pattern_shirt, "D22 Denim shorts", "599.900 IDR"),
+//        Product(R.drawable.flowy_pattern_shirt, "D23 Ripped denim shorts", "499.900 IDR"),
+//        Product(R.drawable.flowy_white_shirt, "D22 Denim shorts", "599.900 IDR")
+//    )
+    if (products.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "No products available yet.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
             )
         }
+    } else {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = modifier
+                .fillMaxSize()
+                .padding(horizontal = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(vertical = 16.dp)
+        ) {
+//            item(span = { GridItemSpan(2) }) {
+//                BigProductCard(
+//                    product = products.first(),
+//                    modifier = Modifier.fillMaxWidth()
+//                )
+//            }
 
-        // Two-column product grid
-        items(products) { product ->
-            ProductItem(product)
+            // Two-column product grid
+            items(products) { product ->
+                ProductItem(product)
+            }
         }
     }
 }
 
+//@Composable
+//fun BigProductCard(
+//    product: ProductTable,
+//    modifier: Modifier = Modifier
+//) {
+//    Column(
+//        horizontalAlignment = Alignment.Start,
+//        modifier = modifier
+//            .fillMaxWidth()
+//    ) {
+////        Image(
+////            painter = painterResource(id = R.drawable.preview),
+////            contentDescription = "Short flowing printed dress",
+////            contentScale = ContentScale.Crop,
+////            modifier = Modifier
+////                .fillMaxWidth()
+////                .height(180.dp)
+////                .background(MaterialTheme.colorScheme.surfaceVariant)
+////        )
+//        AsyncImage(
+//            model = ImageRequest.Builder(LocalContext.current)
+//                .data(product.product_image)
+//                .crossfade(true)
+//                .build(),
+//            contentDescription = product.product_name,
+//            contentScale = ContentScale.Crop,
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .height(180.dp)
+//                .background(MaterialTheme.colorScheme.surfaceVariant)
+//        )
+//        Spacer(modifier = Modifier.height(6.dp))
+//        Text(
+//            text = product.product_name,
+//            style = MaterialTheme.typography.bodySmall,
+//            textAlign = TextAlign.Center,
+//            maxLines = 1,
+//            overflow = TextOverflow.Ellipsis
+//        )
+//        Text(
+//            text = "${product.price} IDR",
+//            style = MaterialTheme.typography.titleMedium,
+//            textAlign = TextAlign.Center,
+//            maxLines = 1,
+//            overflow = TextOverflow.Ellipsis
+//        )
+//    }
+//}
+
+//data class Product(
+//    val imageRes: Int,
+//    val name: String,
+//    val price: String
+//)
+
 @Composable
-fun BigProductCard(
-    modifier: Modifier = Modifier
+fun ProductItem(
+    product: ProductTable
 ) {
-    Column(
-        horizontalAlignment = Alignment.Start,
-        modifier = modifier
-            .fillMaxWidth()
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.preview),
-            contentDescription = "Short flowing printed dress",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(180.dp)
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-        )
-        Spacer(modifier = Modifier.height(6.dp))
-        Text(
-            text = "Short flowing printed dress",
-            style = MaterialTheme.typography.bodySmall,
-            textAlign = TextAlign.Center,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-        Text(
-            text = "999.900 IDR",
-            style = MaterialTheme.typography.titleMedium,
-            textAlign = TextAlign.Center,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-    }
-}
-
-data class Product(
-    val imageRes: Int,
-    val name: String,
-    val price: String
-)
-
-@Composable
-fun ProductItem(product: Product) {
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
-        Image(
-            painter = painterResource(id = product.imageRes),
-            contentDescription = product.name,
+//        Image(
+//            painter = painterResource(id = product.imageRes),
+//            contentDescription = product.name,
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .aspectRatio(1f),
+//            contentScale = ContentScale.Crop
+//        )
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(product.product_image)
+                .crossfade(true)
+                .build(),
+            contentDescription = product.product_name,
+            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(1f),
-            contentScale = ContentScale.Crop
+                .aspectRatio(1f)
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = product.name,
+            text = product.product_name,
             style = MaterialTheme.typography.bodySmall
         )
         Text(
-            text = product.price,
+            text = "${product.price} IDR",
             style = MaterialTheme.typography.titleMedium
         )
     }
 }
 
-@Composable
-fun HomeBottomBar(
-    selectedItem: Int,
-    onItemSelected: (Int) -> Unit,
-    cartItemCount: Int = 0
-) {
-    NavigationBar(
-        windowInsets = NavigationBarDefaults.windowInsets,
-        containerColor = MaterialTheme.colorScheme.background,
-        tonalElevation = 6.dp
-    ) {
-        // Home
-        NavigationBarItem(
-            selected = selectedItem == 0,
-            onClick = { onItemSelected(0) },
-            icon = {
-                Icon(
-                    imageVector = if (selectedItem == 0) Icons.Filled.Home else Icons.Outlined.Home,
-                    contentDescription = "Home",
-                    modifier = Modifier.size(30.dp)
-                )
-            },
-            alwaysShowLabel = false,
-            colors = NavigationBarItemDefaults.colors(
-                indicatorColor = Color.Transparent
-            )
-        )
-
-        // Logo (Disabled)
-        NavigationBarItem(
-            selected = false,
-            onClick = {},
-            enabled = false,
-            icon = {
-                Image(
-                    painter = painterResource(R.drawable.valentina_logo),
-                    contentDescription = "Valentina Logo",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .size(28.dp)
-                )
-            }
-        )
-
-        // Cart
-        NavigationBarItem(
-            selected = selectedItem == 2,
-            onClick = { onItemSelected(2) },
-            icon = {
-                BadgedBox(
-                    badge = {
-                        if (cartItemCount > 0) {
-                            Badge {
-                                Text("$cartItemCount")
-                            }
-                        }
-                    }
-                ) {
-                    Icon(
-                        imageVector = if (selectedItem == 2) Icons.Filled.ShoppingCart else Icons.Outlined.ShoppingCart,
-                        contentDescription = "Cart",
-                        modifier = Modifier.size(30.dp)
-                    )
-                }
-            },
-            alwaysShowLabel = false,
-            colors = NavigationBarItemDefaults.colors(
-                indicatorColor = Color.Transparent
-            )
-        )
-    }
-}
-
-
-
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
     AppTheme {
-        HomeScreen()
+        HomeScreen(goProfile = {})
     }
 }

@@ -16,7 +16,10 @@ import ord.ibda.vto.ui.home.HomeScreen
 import ord.ibda.vto.ui.login.LoginScreen
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import ord.ibda.vto.ui.cart.CartScreen
+import ord.ibda.vto.ui.component.BottomNavigationBar
 import ord.ibda.vto.ui.component.LoadingScreen
+import ord.ibda.vto.ui.profile.ProfileScreen
 import ord.ibda.vto.ui.session.viewmodel.SessionViewModel
 import ord.ibda.vto.ui.signup.SignUpScreen
 import ord.ibda.vto.ui.welcome.WelcomeScreen
@@ -33,14 +36,21 @@ data object LoginScreenNK: NavKey
 @Serializable
 data object HomeScreenNK: NavKey
 
+@Serializable
+data object CartScreenNK: NavKey
+
+@Serializable
+data object ProfileScreenNK: NavKey
+
 @Composable
 fun NavigationRoot(
     modifier: Modifier = Modifier,
     sessionViewModel: SessionViewModel = hiltViewModel()
 ) {
-    val loggedInUserId by sessionViewModel.loggedInUserId.collectAsState(initial = null)
+    val loggedInUserId by sessionViewModel.loggedInUserId.collectAsState()
+    val isInitialized by sessionViewModel.isInitialized.collectAsState()
 
-    if (loggedInUserId == null) {
+    if (!isInitialized) {
         LoadingScreen()
         return
     }
@@ -106,7 +116,38 @@ fun NavigationRoot(
                     NavEntry(
                         key = key
                     ) {
-                        HomeScreen()
+                        HomeScreen(
+                            goProfile = { backStack.add(ProfileScreenNK)},
+                            bottomBar = {
+                                BottomNavigationBar(
+                                    currentDestination = HomeScreenNK,
+                                    onNavigate = { dest -> backStack.add(dest) },
+                                    cartItemCount = 3
+                                )
+                            }
+                        )
+                    }
+                }
+                is CartScreenNK -> {
+                    NavEntry(
+                        key = key
+                    ) {
+                        CartScreen(
+                            bottomBar = {
+                                BottomNavigationBar(
+                                    currentDestination = CartScreenNK,
+                                    onNavigate = { dest -> backStack.add(dest) },
+                                    cartItemCount = 3
+                                )
+                            }
+                        )
+                    }
+                }
+                is ProfileScreenNK -> {
+                    NavEntry(
+                        key = key
+                    ) {
+                        ProfileScreen()
                     }
                 }
                 else -> throw RuntimeException("Invalid Navkey.")

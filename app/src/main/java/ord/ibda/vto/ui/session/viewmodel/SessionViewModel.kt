@@ -17,10 +17,14 @@ class SessionViewModel @Inject constructor(
     private val _loggedInUserId = MutableStateFlow<Int?>(null)
     val loggedInUserId: StateFlow<Int?> = _loggedInUserId
 
+    private val _isInitialized = MutableStateFlow(false)
+    val isInitialized: StateFlow<Boolean> = _isInitialized
+
     init {
         viewModelScope.launch {
             sessionManager.loggedInUserId.collect { id ->
                 _loggedInUserId.value = id
+                _isInitialized.value = true
             }
         }
     }

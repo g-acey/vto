@@ -30,6 +30,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -44,11 +48,15 @@ import ord.ibda.vto.ui.theme.AppTheme
 
 @Composable
 fun CartScreen(
+    bottomBar: @Composable () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         bottomBar = {
-            ProcessOrder()
+            Column {
+                ProcessOrder()
+                bottomBar()
+            }
         }
     ) { innerPadding ->
         Column {
