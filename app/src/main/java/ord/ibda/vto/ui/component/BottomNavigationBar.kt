@@ -1,7 +1,9 @@
 package ord.ibda.vto.ui.component
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -10,6 +12,7 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -108,10 +111,17 @@ fun BottomNavigationBar(
     onNavigate: (NavKey) -> Unit,
     cartItemCount: Int = 0
 ) {
+    Divider(
+        modifier = Modifier
+            .height(1.dp)
+            .background(MaterialTheme.colorScheme.onSurfaceVariant)
+    )
     NavigationBar(
         windowInsets = NavigationBarDefaults.windowInsets,
-        containerColor = MaterialTheme.colorScheme.background,
-        tonalElevation = 6.dp
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        tonalElevation = 6.dp,
+        modifier = Modifier
+            .height(85.dp)
     ) {
         // Home
         NavigationBarItem(

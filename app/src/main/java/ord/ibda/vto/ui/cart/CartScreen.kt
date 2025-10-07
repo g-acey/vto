@@ -53,18 +53,21 @@ fun CartScreen(
 ) {
     Scaffold(
         bottomBar = {
-            Column {
+            Column() {
                 ProcessOrder()
                 bottomBar()
             }
         }
     ) { innerPadding ->
-        Column {
+        Column(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                .padding(top = 25.dp)
+        ) {
             CartTile(
                 modifier = Modifier
                     .padding(top = 20.dp, start = 20.dp, end = 20.dp)
             )
-            Spacer(modifier = Modifier.height(10.dp))
             CartItems(
                 modifier = Modifier
                     .fillMaxSize()
@@ -291,7 +294,6 @@ fun ProcessOrder(
             modifier = modifier
                 .fillMaxWidth()
                 .height(150.dp)
-                .background(MaterialTheme.colorScheme.surfaceContainerLow)
                 .padding(horizontal = 20.dp, vertical = 14.dp)
         ) {
             TotalDetails(
