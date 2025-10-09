@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,8 +16,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.outlined.ArrowForward
+import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material.icons.rounded.CenterFocusWeak
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
@@ -27,17 +32,30 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -45,78 +63,236 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import ord.ibda.vto.R
+import ord.ibda.vto.data.models.rooms.ProductTable
+import ord.ibda.vto.ui.productdetails.viewmodel.ProductDetailsEvent
+import ord.ibda.vto.ui.productdetails.viewmodel.ProductDetailsViewModel
 import ord.ibda.vto.ui.theme.AppTheme
 import ord.ibda.vto.ui.theme.fontFamilySemiBold
 
+//@Composable
+//fun ProductDetailsScreen(
+//    productId: Int,
+//    onBack: () -> Unit,
+//    productDetailsViewModel: ProductDetailsViewModel = hiltViewModel(),
+//    modifier: Modifier = Modifier
+//) {
+//    val productDetailsState by productDetailsViewModel.state.collectAsState()
+//
+//    LaunchedEffect(productId) {
+//        productDetailsViewModel.onEvent(ProductDetailsEvent.LoadProduct(productId))
+//    }
+//
+//    Box(
+//        modifier = modifier
+//            .fillMaxSize()
+//            .background(MaterialTheme.colorScheme.surfaceVariant)
+//    ) {
+//        productDetailsState.product?.let { product ->
+//            Column(
+//                verticalArrangement = Arrangement.Bottom,
+//                modifier = Modifier.fillMaxSize()
+//            ) {
+//                Column(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .weight(8f)
+//                ) {
+//                    PartialBottomSheet(
+//                        onBack = onBack,
+//                        product = product
+//                    )
+//                }
+//
+//                Column(
+//                    modifier = Modifier
+//                        .background(MaterialTheme.colorScheme.surfaceContainerLow)
+//                        .fillMaxWidth()
+//                        .padding(horizontal = 20.dp, vertical = 20.dp)
+//                        .weight(1f)
+//                ) {
+//                    Button(
+//                        onClick = {
+//                            productDetailsViewModel.onEvent(ProductDetailsEvent.AddToCart(product.product_id))
+//                        },
+//                        colors = ButtonDefaults.buttonColors(
+//                            containerColor = MaterialTheme.colorScheme.onPrimaryContainer
+//                        ),
+//                        shape = RoundedCornerShape(4.dp),
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .height(53.dp)
+//                    ) {
+//                        Text(
+//                            text = "Add to cart",
+//                            color = MaterialTheme.colorScheme.onPrimary,
+//                            style = MaterialTheme.typography.labelLarge,
+//                            fontSize = 20.sp,
+//                            fontWeight = FontWeight.SemiBold
+//                        )
+//                    }
+//                }
+//            }
+//        } ?: run {
+//            Text(
+//                text = if (productDetailsState.isLoading)
+//                    "Loading..."
+//                else productDetailsState.error ?: "Product not found",
+//                style = MaterialTheme.typography.titleMedium,
+//                modifier = Modifier.align(Alignment.Center)
+//            )
+//        }
+//    }
+//}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductDetailsScreen(
+    productId: Int,
+    onBack: () -> Unit,
+    onGoToCart: () -> Unit,
+    productDetailsViewModel: ProductDetailsViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.surfaceVariant)
-    ) {
-//        Image(
-//            painter = painterResource(id = R.drawable.product_detail_preview),
-//            contentDescription = "Product image",
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .aspectRatio(1 / 2f)
-//                .graphicsLayer(scaleX = 1.2f, scaleY = 1.2f)
-//                .absoluteOffset(x = 0.dp, y = (-75).dp)
-//        )
-        Column(
-            verticalArrangement = Arrangement.Bottom,
-            modifier = Modifier
-                .fillMaxSize()
-        )   {
-//            FloatingActionButton(
-//                onClick = { },
-//                shape = RoundedCornerShape(4.dp),
-//                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-//                contentColor = MaterialTheme.colorScheme.onSurface,
-//                modifier = Modifier
-//                    .align(alignment = Alignment.End)
-//                    .padding(16.dp)
-//            ) {
-//                Icon(
-//                    imageVector = Icons.Rounded.CenterFocusWeak,
-//                    contentDescription = "Virtual clothes try-on icon",
-//                    modifier = Modifier
-//                        .size(30.dp)
-//                )
-//            }
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(8f)
-            ) {
-                PartialBottomSheet()
+    val productDetailsState by productDetailsViewModel.state.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(productId) {
+        productDetailsViewModel.onEvent(ProductDetailsEvent.LoadProduct(productId))
+    }
+
+    LaunchedEffect(productDetailsState.showSnackbar) {
+        if (productDetailsState.showSnackbar) {
+            val result = snackbarHostState.showSnackbar(
+                message = "Product added",
+                actionLabel = "Go to cart",
+                duration = SnackbarDuration.Short
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                onGoToCart()
             }
+            productDetailsViewModel.onSnackbarShown()
+        }
+    }
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        // --- Your existing layout preserved ---
+        productDetailsState.product?.let { product ->
             Column(
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.surfaceContainerLow)
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 20.dp)
-                    .weight(1f)
+                verticalArrangement = Arrangement.Bottom,
+                modifier = Modifier.fillMaxSize()
             ) {
-                Button(
-                    onClick = {  },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onPrimaryContainer),
-                    shape = RoundedCornerShape(4.dp),
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(53.dp)
+                        .weight(8f)
+                ) {
+                    PartialBottomSheet(
+                        onBack = onBack,
+                        product = product
+                    )
+                }
+
+                Column(
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 20.dp)
+                        .weight(1f)
+                ) {
+                    Button(
+                        onClick = {
+                            productDetailsViewModel.onEvent(
+                                ProductDetailsEvent.AddToCart(product.product_id)
+                            )
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        ),
+                        shape = RoundedCornerShape(4.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(53.dp)
+                    ) {
+                        Text(
+                            text = "Add to cart",
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            style = MaterialTheme.typography.labelLarge,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+            }
+        } ?: run {
+            Text(
+                text = if (productDetailsState.isLoading)
+                    "Loading..."
+                else productDetailsState.error ?: "Product not found",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 26.5.dp)
+        ) { data ->
+            Snackbar(
+                shape = RoundedCornerShape(4.dp),
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .height(53.dp)
+                    .fillMaxWidth()
+                    .shadow(8.dp, RoundedCornerShape(4.dp))
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 5.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Select Size",
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        style = MaterialTheme.typography.labelLarge,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.SemiBold
+                        text = data.visuals.message,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        modifier = Modifier.weight(1f)
                     )
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clickable { data.performAction() }
+                            .padding(start = 12.dp)
+                    ) {
+                        Text(
+                            text = data.visuals.actionLabel ?: "",
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Icon(
+                            imageVector = Icons.Outlined.ArrowForward,
+                            contentDescription = "Go to cart",
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
             }
         }
@@ -125,8 +301,13 @@ fun ProductDetailsScreen(
 
 @Composable
 fun ProductTitle(
+    product: ProductTable,
     modifier: Modifier = Modifier
 ) {
+    val formattedPrice = remember(product.price) {
+        "%,d IDR".format(product.price).replace(',', '.')
+    }
+
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Bottom,
@@ -134,12 +315,12 @@ fun ProductTitle(
             .fillMaxWidth()
     ) {
         Text(
-            text = "Camisole with mid-ribbon",
+            text = product.product_name,
             color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.titleMedium
         )
         Text(
-            text = "399.900 IDR",
+            text = formattedPrice,
             color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.labelLarge.copy(
                 fontSize = 20.sp,
@@ -151,6 +332,7 @@ fun ProductTitle(
 
 @Composable
 fun ProductDescription(
+    product: ProductTable,
     modifier: Modifier = Modifier
 ){
     Box(
@@ -162,12 +344,12 @@ fun ProductDescription(
                 .fillMaxWidth()
         ) {
             ProductTitle(
+                product = product,
                 modifier = Modifier
                     .padding(bottom = 16.dp)
             )
             Text(
-                text = "Top with cowl neckline and thin straps that adjust at the back." +
-                        " Gathered fabric detail on the sides.",
+                text = product.product_details,
                 style = MaterialTheme.typography.bodyMedium.copy(
                     textAlign = TextAlign.Justify
                 )
@@ -314,6 +496,7 @@ fun ProductRecommendation(
 
 @Composable
 fun BsContent(
+    product: ProductTable,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -323,7 +506,9 @@ fun BsContent(
         Column(
             modifier = Modifier
         ) {
-            ProductDescription()
+            ProductDescription(
+                product = product
+            )
             AboutProduct()
         }
     }
@@ -332,6 +517,8 @@ fun BsContent(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PartialBottomSheet(
+    onBack: () -> Unit,
+    product: ProductTable,
     modifier: Modifier = Modifier
 ) {
 
@@ -340,7 +527,9 @@ fun PartialBottomSheet(
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetContent = {
-            BsContent()
+            BsContent(
+                product = product
+            )
         },
         sheetPeekHeight = 100.dp,
         sheetShape = RoundedCornerShape(0.dp)
@@ -350,15 +539,40 @@ fun PartialBottomSheet(
                 .fillMaxSize()
                 .background(color = MaterialTheme.colorScheme.surfaceVariant)
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.teen),
-                contentDescription = "Product image",
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(product.product_image)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = product.product_name,
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxSize()
                     .aspectRatio(1 / 2f)
-                    .graphicsLayer(scaleX = 1.35f, scaleY = 1.35f)
-                    .absoluteOffset(x = 0.dp, y = (-75).dp)
+                    .absoluteOffset(x = 0.dp, y = (-25).dp)
             )
+//            Image(
+//                painter = painterResource(id = R.drawable.teen),
+//                contentDescription = "Product image",
+//                modifier = Modifier
+//                    .fillMaxSize()
+//                    .aspectRatio(1 / 2f)
+//                    .graphicsLayer(scaleX = 1.35f, scaleY = 1.35f)
+//                    .absoluteOffset(x = 0.dp, y = (-75).dp)
+//            )
+            IconButton(
+                onClick = { onBack() },
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(top = 32.dp, start = 16.dp)
+                    .size(40.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -389,6 +603,6 @@ fun PartialBottomSheet(
 @Composable
 fun ProductDetailsScreenPreview() {
     AppTheme {
-        ProductDetailsScreen()
+        ProductDetailsScreen(productId = 0, onBack = {}, onGoToCart = {})
     }
 }

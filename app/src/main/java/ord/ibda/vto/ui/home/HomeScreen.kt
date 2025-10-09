@@ -1,9 +1,8 @@
 package ord.ibda.vto.ui.home
 
-import android.content.Context
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,10 +14,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,23 +23,13 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.ShoppingCart
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarDefaults
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.SearchBar
@@ -65,7 +52,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.text.style.TextAlign
@@ -76,18 +62,20 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import ord.ibda.vto.R
 import ord.ibda.vto.data.models.ProductType
 import ord.ibda.vto.data.models.rooms.ProductTable
 import ord.ibda.vto.ui.home.viewmodel.HomeEvent
 import ord.ibda.vto.ui.home.viewmodel.HomeViewModel
 import ord.ibda.vto.ui.theme.AppTheme
+import java.text.NumberFormat
+import java.util.Locale
 
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
     goProfile: () -> Unit,
     bottomBar: @Composable () -> Unit = {},
+    goProductDetails: (Int) -> Unit,
     homeViewModel: HomeViewModel = hiltViewModel()
 ) {
     val homeState by homeViewModel.state.collectAsState()
@@ -116,7 +104,10 @@ fun HomeScreen(
             )
             Spacer(modifier = Modifier.height(20.dp))
             ProductCatalog(
-                products = homeState.products
+                products = homeState.products,
+                onProductClick = { product ->
+                    goProductDetails(product.product_id)
+                }
             )
         }
     }
@@ -420,6 +411,7 @@ fun SimpleSearchBar(
 @Composable
 fun ProductCatalog(
     products: List<ProductTable>,
+    onProductClick: (ProductTable) -> Unit,
     modifier: Modifier = Modifier
 ) {
 //    val products = listOf(
@@ -461,7 +453,10 @@ fun ProductCatalog(
 
             // Two-column product grid
             items(products) { product ->
-                ProductItem(product)
+                ProductItem(
+                    product,
+                    onClick = { onProductClick(product) }
+                )
             }
         }
     }
@@ -524,10 +519,13 @@ fun ProductCatalog(
 
 @Composable
 fun ProductItem(
-    product: ProductTable
+    product: ProductTable,
+    onClick: () -> Unit,
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable{ onClick() }
     ) {
 //        Image(
 //            painter = painterResource(id = product.imageRes),
@@ -553,17 +551,25 @@ fun ProductItem(
             text = product.product_name,
             style = MaterialTheme.typography.bodySmall
         )
-        Text(
-            text = "${product.price} IDR",
-            style = MaterialTheme.typography.titleMedium
-        )
+        FormattedPrice(product.price)
     }
+}
+
+@Composable
+fun FormattedPrice(price: Int) {
+    val formattedPrice = remember(price) {
+        NumberFormat.getNumberInstance(Locale("in", "ID")).format(price)
+    }
+    Text(
+        text = "IDR $formattedPrice",
+        style = MaterialTheme.typography.titleMedium
+    )
 }
 
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
     AppTheme {
-        HomeScreen(goProfile = {})
+        HomeScreen(goProfile = {}, goProductDetails = {})
     }
 }

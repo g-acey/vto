@@ -25,17 +25,33 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import ord.ibda.vto.ui.profile.viewmodel.ProfileEvent
+import ord.ibda.vto.ui.profile.viewmodel.ProfileViewModel
 import ord.ibda.vto.ui.theme.AppTheme
 
 @Composable
 fun ProfileScreen(
+    profileViewModel: ProfileViewModel = hiltViewModel(),
+    onLogout: () -> Unit,
+    goEditProfile: () -> Unit,
+    goOrders: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val profileState by profileViewModel.state.collectAsState()
+
+    LaunchedEffect(Unit) {
+        profileViewModel.onEvent(ProfileEvent.LoadUser)
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -45,7 +61,7 @@ fun ProfileScreen(
 
         // Header
         Text(
-            text = "Hi Gracey",
+            text = "Hi ${profileState.username}",
             style = MaterialTheme.typography.displaySmall,
             color = MaterialTheme.colorScheme.onSecondaryContainer,
             modifier = Modifier
@@ -63,15 +79,30 @@ fun ProfileScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         // Menu Items
-        ProfileMenuItem(Icons.Outlined.ListAlt, "My orders")
-        ProfileMenuItem(Icons.Outlined.Person, "Personal details")
+        ProfileMenuItem(
+            Icons.Outlined.ListAlt,
+            "My orders",
+            onClick = { goOrders() }
+        )
+        ProfileMenuItem(
+            Icons.Outlined.Person,
+            "Personal details",
+            onClick = { goEditProfile() }
+        )
         ProfileMenuItem(Icons.Outlined.CreditCard, "Payment methods")
         ProfileMenuItem(Icons.Outlined.Place, "Delivery address")
         Spacer(modifier = Modifier.height(16.dp))
         ProfileMenuItem(Icons.Outlined.HelpOutline, "Help")
         ProfileMenuItem(Icons.Outlined.Email, "Inbox")
         ProfileMenuItem(Icons.Outlined.Settings, "Settings")
-        ProfileMenuItem(Icons.Outlined.Logout, "Log out")
+        ProfileMenuItem(
+            Icons.Outlined.Logout,
+            "Log out",
+            onClick = {
+                profileViewModel.onEvent(ProfileEvent.Logout)
+                onLogout()
+            }
+        )
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -107,12 +138,16 @@ fun ProfileScreen(
 }
 
 @Composable
-fun ProfileMenuItem(icon: ImageVector, label: String) {
+fun ProfileMenuItem(
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit = {}
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { }
+            .clickable { onClick() }
             .padding(horizontal = 20.dp, vertical = 16.dp)
     ) {
         Icon(
@@ -134,6 +169,6 @@ fun ProfileMenuItem(icon: ImageVector, label: String) {
 @Composable
 fun ProfileScreenPreview() {
     AppTheme {
-        ProfileScreen()
+        ProfileScreen(onLogout = {}, goEditProfile = {}, goOrders = {})
     }
 }
