@@ -1,13 +1,11 @@
 package ord.ibda.vto.ui.cart
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,11 +16,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,31 +28,39 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ord.ibda.vto.R
+import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import ord.ibda.vto.data.models.CartProductDetail
+import ord.ibda.vto.ui.cart.viewmodel.CartEvent
+import ord.ibda.vto.ui.cart.viewmodel.CartViewModel
 import ord.ibda.vto.ui.theme.AppTheme
+import java.text.NumberFormat
+import java.util.Locale
 
 @Composable
 fun CartScreen(
+    cartViewModel: CartViewModel = hiltViewModel(),
     bottomBar: @Composable () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val cartState by cartViewModel.state.collectAsState()
+
     Scaffold(
         bottomBar = {
-            Column() {
-                ProcessOrder()
+            Column {
+                ProcessOrder(totalPrice = cartState.totalPrice)
                 bottomBar()
             }
         }
@@ -64,21 +70,61 @@ fun CartScreen(
                 .background(MaterialTheme.colorScheme.surfaceContainerLow)
                 .padding(top = 25.dp)
         ) {
-            CartTile(
+            CartTitle(
+                itemCount = cartState.itemCount,
                 modifier = Modifier
                     .padding(top = 20.dp, start = 20.dp, end = 20.dp)
             )
-            CartItems(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-            )
+            when {
+                cartState.isLoading -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Loading...",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                cartState.cartItems.isEmpty() -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Your cart is empty.",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                else -> {
+                    CartItems(
+                        cartList = cartState.cartItems,
+                        onDecrease = { cartViewModel.onEvent(CartEvent.DecreaseQuantity(it)) },
+                        onIncrease = { cartViewModel.onEvent(CartEvent.IncreaseQuantity(it)) },
+                        onDelete = { cartViewModel.onEvent(CartEvent.DeleteItem(it)) },
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(innerPadding)
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
-fun CartTile(
+fun CartTitle(
+    itemCount: Int,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -93,7 +139,7 @@ fun CartTile(
                 .weight(1.2f)
         )
         Text(
-            text = "(3)",
+            text = "(${itemCount})",
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier
                 .weight(3f)
@@ -102,38 +148,52 @@ fun CartTile(
     }
 }
 
-data class CartItem(
-    val imageRes: Int,
-    val name: String,
-    val size: String,
-    val quantity: Int,
-    val price: Double
-)
-
 @Composable
 fun CartItems(
+    cartList: List<CartProductDetail>,
+    onDecrease: (Int) -> Unit,
+    onIncrease: (Int) -> Unit,
+    onDelete: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val cartList = listOf(
-        CartItem(R.drawable.black_tank, "T12 Tank top", "XS", 2, 499.900),
-        CartItem(R.drawable.red_offshoulder, "T12 Tank top", "XS", 1, 499.900),
-        CartItem(R.drawable.red_offshoulder, "T12 Tank top", "XS", 1, 499.900),
-        CartItem(R.drawable.red_offshoulder, "T12 Tank top", "XS", 1, 499.900)
-    )
-
-    LazyColumn(
-        modifier = modifier
-    ) {
-        items(cartList) { item ->
-            CartItemRow(item)
+    if (cartList.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 80.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Your cart is empty",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    } else {
+        LazyColumn(
+            modifier = modifier
+        ) {
+            items(cartList) { item ->
+                CartItemRow(
+                    item = item,
+                    onDecrease = { onDecrease(item.cart_id) },
+                    onIncrease = { onIncrease(item.cart_id) },
+                    onDelete = { onDelete(item.cart_id) }
+                )
+            }
         }
     }
 }
 
 @Composable
 fun CartItemRow(
-    item: CartItem
+    item: CartProductDetail,
+    onDecrease: () -> Unit,
+    onIncrease: () -> Unit,
+    onDelete: () -> Unit
 ) {
+    val product = item.product
+
     Row(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier
@@ -150,99 +210,132 @@ fun CartItemRow(
             ) {
 
             }
-            Image(
-                painter = painterResource(id = item.imageRes),
-                contentDescription = null,
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(product.product_image)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = product.product_name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(width = 150.dp, height = 200.dp)
             )
+//            Image(
+//                painter = painterResource(id = item.imageRes),
+//                contentDescription = null,
+//                contentScale = ContentScale.Crop,
+//                modifier = Modifier
+//                    .size(width = 150.dp, height = 200.dp)
+//            )
         }
 
+        val formattedPrice = NumberFormat.getNumberInstance(Locale("in", "ID"))
+            .format(product.price)
+
+        val formattedTotalPrice = NumberFormat.getNumberInstance(Locale("in", "ID"))
+            .format((product.price * item.quantity))
+
         Column(
+            verticalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier
                 .weight(1f)
+                .height(200.dp)
         ) {
-            Text(
-                text = "${String.format("%.3f", item.price)} IDR",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier
-                    .padding(bottom = 10.dp)
-            )
-            Text(
-                text = item.name,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier
-                    .padding(bottom = 10.dp)
-            )
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Column {
                 Text(
-                    text = item.size,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = "$formattedTotalPrice IDR",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier
+                        .padding(bottom = 10.dp)
                 )
-                if (item.quantity > 1) {
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "${item.quantity}x",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                Text(
+                    text = product.product_name,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .padding(bottom = 10.dp)
+                )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (item.quantity > 1) {
+                        Text(
+                            text = "${item.quantity}x",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "$formattedPrice IDR",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                    }
+                }
+            }
+
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier
+                    .background(
+                        MaterialTheme.colorScheme.surfaceContainerHigh,
+                        RoundedCornerShape(6.dp)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "${String.format("%.3f", (item.price / item.quantity))} IDR",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                IconButton(
+                    onClick = onDecrease,
+                    enabled = item.quantity > 1,
+                    modifier = Modifier.size(20.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Remove,
+                        contentDescription = "Decrease quantity",
+                        tint = if (item.quantity > 1)
+                            MaterialTheme.colorScheme.onSurface
+                        else
+                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)
+                    )
+                }
+                Text(
+                    text = item.quantity.toString(),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                IconButton(
+                    onClick = onIncrease,
+                    modifier = Modifier.size(20.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Increase quantity",
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
         }
 
-        Row(
-            verticalAlignment = Alignment.Top,
-            horizontalArrangement = Arrangement.SpaceEvenly,
+        IconButton(
+            onClick = onDelete,
             modifier = Modifier
-                .height(20.dp)
+                .size(20.dp)
+                .align(Alignment.Top)
         ) {
-            IconButton(
-                onClick = { /* edit action */ },
-                modifier = Modifier
-                    .size(17.dp)
-            ) {
-                Icon(
-                    Icons.Outlined.Edit, contentDescription = "Edit",
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier
-                )
-            }
-            Spacer(modifier = Modifier.width(10.dp))
-            Divider(
-                color = MaterialTheme.colorScheme.outlineVariant,
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .width(1.dp)
+            Icon(
+                Icons.Outlined.Delete,
+                contentDescription = "Delete",
+                tint = MaterialTheme.colorScheme.onSurface
             )
-            Spacer(modifier = Modifier.width(10.dp))
-            IconButton(
-                onClick = { /* delete action */ },
-                modifier = Modifier
-                    .size(17.dp)
-            ) {
-                Icon(
-                    Icons.Outlined.Delete, contentDescription = "Delete",
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-            }
         }
     }
 }
 
 @Composable
 fun TotalDetails(
+    totalPrice: Int,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -266,7 +359,7 @@ fun TotalDetails(
                 .weight(1f)
         )
         Text(
-            text = "999.800 IDR",
+            text = "${"%,d".format(totalPrice)} IDR",
             style = MaterialTheme.typography.titleLarge.copy(
                 textAlign = TextAlign.End
             ),
@@ -279,6 +372,7 @@ fun TotalDetails(
 
 @Composable
 fun ProcessOrder(
+    totalPrice: Int,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -297,11 +391,12 @@ fun ProcessOrder(
                 .padding(horizontal = 20.dp, vertical = 14.dp)
         ) {
             TotalDetails(
+                totalPrice = totalPrice,
                 modifier = Modifier
                     .padding(bottom = 30.dp)
             )
             Button(
-                onClick = { },
+                onClick = { /* process order */ },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onPrimaryContainer),
                 shape = RoundedCornerShape(4.dp),
                 modifier = Modifier

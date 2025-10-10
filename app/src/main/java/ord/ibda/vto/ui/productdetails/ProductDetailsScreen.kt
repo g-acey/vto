@@ -2,8 +2,10 @@ package ord.ibda.vto.ui.productdetails
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +27,7 @@ import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material.icons.rounded.CenterFocusWeak
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.KeyboardArrowUp
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -52,6 +55,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -72,81 +76,6 @@ import ord.ibda.vto.ui.productdetails.viewmodel.ProductDetailsEvent
 import ord.ibda.vto.ui.productdetails.viewmodel.ProductDetailsViewModel
 import ord.ibda.vto.ui.theme.AppTheme
 import ord.ibda.vto.ui.theme.fontFamilySemiBold
-
-//@Composable
-//fun ProductDetailsScreen(
-//    productId: Int,
-//    onBack: () -> Unit,
-//    productDetailsViewModel: ProductDetailsViewModel = hiltViewModel(),
-//    modifier: Modifier = Modifier
-//) {
-//    val productDetailsState by productDetailsViewModel.state.collectAsState()
-//
-//    LaunchedEffect(productId) {
-//        productDetailsViewModel.onEvent(ProductDetailsEvent.LoadProduct(productId))
-//    }
-//
-//    Box(
-//        modifier = modifier
-//            .fillMaxSize()
-//            .background(MaterialTheme.colorScheme.surfaceVariant)
-//    ) {
-//        productDetailsState.product?.let { product ->
-//            Column(
-//                verticalArrangement = Arrangement.Bottom,
-//                modifier = Modifier.fillMaxSize()
-//            ) {
-//                Column(
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .weight(8f)
-//                ) {
-//                    PartialBottomSheet(
-//                        onBack = onBack,
-//                        product = product
-//                    )
-//                }
-//
-//                Column(
-//                    modifier = Modifier
-//                        .background(MaterialTheme.colorScheme.surfaceContainerLow)
-//                        .fillMaxWidth()
-//                        .padding(horizontal = 20.dp, vertical = 20.dp)
-//                        .weight(1f)
-//                ) {
-//                    Button(
-//                        onClick = {
-//                            productDetailsViewModel.onEvent(ProductDetailsEvent.AddToCart(product.product_id))
-//                        },
-//                        colors = ButtonDefaults.buttonColors(
-//                            containerColor = MaterialTheme.colorScheme.onPrimaryContainer
-//                        ),
-//                        shape = RoundedCornerShape(4.dp),
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .height(53.dp)
-//                    ) {
-//                        Text(
-//                            text = "Add to cart",
-//                            color = MaterialTheme.colorScheme.onPrimary,
-//                            style = MaterialTheme.typography.labelLarge,
-//                            fontSize = 20.sp,
-//                            fontWeight = FontWeight.SemiBold
-//                        )
-//                    }
-//                }
-//            }
-//        } ?: run {
-//            Text(
-//                text = if (productDetailsState.isLoading)
-//                    "Loading..."
-//                else productDetailsState.error ?: "Product not found",
-//                style = MaterialTheme.typography.titleMedium,
-//                modifier = Modifier.align(Alignment.Center)
-//            )
-//        }
-//    }
-//}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -183,7 +112,6 @@ fun ProductDetailsScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        // --- Your existing layout preserved ---
         productDetailsState.product?.let { product ->
             Column(
                 verticalArrangement = Arrangement.Bottom,
@@ -560,12 +488,19 @@ fun PartialBottomSheet(
 //                    .graphicsLayer(scaleX = 1.35f, scaleY = 1.35f)
 //                    .absoluteOffset(x = 0.dp, y = (-75).dp)
 //            )
-            IconButton(
-                onClick = { onBack() },
+            Box(
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(top = 32.dp, start = 16.dp)
                     .size(40.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = LocalIndication.current
+                    ) {
+                        onBack()
+                    },
+                contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,

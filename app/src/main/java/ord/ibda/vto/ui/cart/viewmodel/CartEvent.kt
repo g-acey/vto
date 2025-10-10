@@ -1,7 +1,8 @@
 package ord.ibda.vto.ui.cart.viewmodel
 
 sealed class CartEvent {
-    object DeleteItem: CartEvent()
-    object EditItem: CartEvent()
-    object ProcessOrder: CartEvent()
+    data object LoadCart : CartEvent()
+    data class IncreaseQuantity(val cartId: Int) : CartEvent()
+    data class DecreaseQuantity(val cartId: Int) : CartEvent()
+    data class DeleteItem(val cartId: Int) : CartEvent()
 }

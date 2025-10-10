@@ -18,6 +18,7 @@ import ord.ibda.vto.ui.login.LoginScreen
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import ord.ibda.vto.ui.cart.CartScreen
+import ord.ibda.vto.ui.cart.viewmodel.CartViewModel
 import ord.ibda.vto.ui.component.BottomNavigationBar
 import ord.ibda.vto.ui.component.LoadingScreen
 import ord.ibda.vto.ui.editprofile.EditProfileScreen
@@ -58,10 +59,12 @@ data object MyOrdersScreenNK: NavKey
 @Composable
 fun NavigationRoot(
     modifier: Modifier = Modifier,
-    sessionViewModel: SessionViewModel = hiltViewModel()
+    sessionViewModel: SessionViewModel = hiltViewModel(),
+    cartViewModel: CartViewModel = hiltViewModel()
 ) {
     val loggedInUserId by sessionViewModel.loggedInUserId.collectAsState()
     val isInitialized by sessionViewModel.isInitialized.collectAsState()
+    val cartState by cartViewModel.state.collectAsState()
 
     if (!isInitialized) {
         LoadingScreen()
@@ -148,7 +151,7 @@ fun NavigationRoot(
                                 BottomNavigationBar(
                                     currentDestination = HomeScreenNK,
                                     onNavigate = { dest -> backStack.add(dest) },
-                                    cartItemCount = 3
+                                    cartItemCount = cartState.itemCount
                                 )
                             }
                         )
@@ -174,7 +177,7 @@ fun NavigationRoot(
                                 BottomNavigationBar(
                                     currentDestination = CartScreenNK,
                                     onNavigate = { dest -> backStack.add(dest) },
-                                    cartItemCount = 3
+                                    cartItemCount = cartState.itemCount
                                 )
                             }
                         )

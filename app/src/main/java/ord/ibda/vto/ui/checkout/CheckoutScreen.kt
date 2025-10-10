@@ -40,13 +40,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ord.ibda.vto.R
-import ord.ibda.vto.ui.cart.CartItem
 import ord.ibda.vto.ui.theme.AppTheme
+
+data class CartItem(
+    val imageRes: Int,
+    val name: String,
+    val size: String,
+    val quantity: Int,
+    val price: Double
+)
 
 @Composable
 fun CheckoutScreen(
     modifier: Modifier = Modifier
 ) {
+
     val cartList = listOf(
         CartItem(R.drawable.black_tank, "T12 Tank top", "XS", 2, 499.900),
         CartItem(R.drawable.red_offshoulder, "T12 Tank top", "XS", 1, 499.900)
