@@ -40,6 +40,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -54,6 +55,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import ord.ibda.vto.R
 import ord.ibda.vto.data.models.OrderProductDetail
 import ord.ibda.vto.ui.checkout.viewmodel.CheckoutEvent
@@ -67,18 +70,10 @@ fun CheckoutScreen(
     orderId: Int,
     gobacktoCart: () -> Unit,
     goHome: () -> Unit,
-    checkoutViewModel: CheckoutViewModel = hiltViewModel(),
+    checkoutViewModel: CheckoutViewModel,
     modifier: Modifier = Modifier
 ) {
     val checkoutState by checkoutViewModel.state.collectAsState()
-//    val snackbarHostState = remember { SnackbarHostState() }
-
-//    LaunchedEffect(checkoutState.snackbarMessage) {
-//        checkoutState.snackbarMessage?.let { message ->
-//            snackbarHostState.showSnackbar(message)
-//            checkoutViewModel.onEvent(CheckoutEvent.ClearSnackbar)
-//        }
-//    }
 
     LaunchedEffect(orderId) {
         checkoutViewModel.onEvent(CheckoutEvent.LoadOrder(orderId))
@@ -549,7 +544,7 @@ fun CancelOrderDialog(
 @Composable
 fun CheckoutScreenPreview() {
     AppTheme {
-        CheckoutScreen(orderId = 0, gobacktoCart = {}, goHome = {})
+//        CheckoutScreen(orderId = 0, gobacktoCart = {}, goHome = {}, checkoutViewModel = )
 //        CancelOrderDialog(onConfirm = {}, onDismiss = {})
     }
 }

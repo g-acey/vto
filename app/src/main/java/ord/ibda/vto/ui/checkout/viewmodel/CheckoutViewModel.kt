@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import ord.ibda.vto.data.db.CartDao
 import ord.ibda.vto.data.db.OrderDao
@@ -71,9 +72,10 @@ class CheckoutViewModel @Inject constructor(
 
             cartDao.clearCart(userId)
 
-//            _state.value = _state.value.copy(
-//                snackbarMessage = "Order successfully made!"
-//            )
+            _state.update {
+                it.copy(snackbarMessage = "Order successfully made!")
+            }
+
         }
     }
 

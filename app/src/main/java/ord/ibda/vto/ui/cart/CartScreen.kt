@@ -52,7 +52,7 @@ import java.util.Locale
 
 @Composable
 fun CartScreen(
-    cartViewModel: CartViewModel = hiltViewModel(),
+    cartViewModel: CartViewModel,
     goCheckoutScreen: (Int) -> Unit,
     bottomBar: @Composable () -> Unit = {},
     modifier: Modifier = Modifier
@@ -432,6 +432,6 @@ fun ProcessOrder(
 @Composable
 fun CartScreenPreview() {
     AppTheme {
-        CartScreen(goCheckoutScreen = {})
+//        CartScreen(goCheckoutScreen = {}, cartViewModel = )
     }
 }
