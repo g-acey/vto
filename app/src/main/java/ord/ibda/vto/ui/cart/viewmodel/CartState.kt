@@ -7,5 +7,6 @@ data class CartState(
     val totalPrice: Int = 0,
     val itemCount: Int = 0,
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val orderId: Int? = null
 )

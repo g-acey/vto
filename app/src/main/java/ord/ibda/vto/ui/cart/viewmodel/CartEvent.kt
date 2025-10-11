@@ -5,4 +5,5 @@ sealed class CartEvent {
     data class IncreaseQuantity(val cartId: Int) : CartEvent()
     data class DecreaseQuantity(val cartId: Int) : CartEvent()
     data class DeleteItem(val cartId: Int) : CartEvent()
+    data object ProcessOrder : CartEvent()
 }

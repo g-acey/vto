@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import ord.ibda.vto.ui.cart.CartScreen
 import ord.ibda.vto.ui.cart.viewmodel.CartViewModel
+import ord.ibda.vto.ui.checkout.CheckoutScreen
 import ord.ibda.vto.ui.component.BottomNavigationBar
 import ord.ibda.vto.ui.component.LoadingScreen
 import ord.ibda.vto.ui.editprofile.EditProfileScreen
@@ -46,6 +47,9 @@ data class ProductDetailScreenNK(val productId: Int): NavKey
 
 @Serializable
 data object CartScreenNK: NavKey
+
+@Serializable
+data class CheckoutScreenNK(val orderId: Int): NavKey
 
 @Serializable
 data object ProfileScreenNK: NavKey
@@ -179,6 +183,25 @@ fun NavigationRoot(
                                     onNavigate = { dest -> backStack.add(dest) },
                                     cartItemCount = cartState.itemCount
                                 )
+                            },
+                            goCheckoutScreen = { orderId ->
+                                backStack.add(CheckoutScreenNK(orderId))
+                            }
+                        )
+                    }
+                }
+                is CheckoutScreenNK -> {
+                    NavEntry(
+                        key = key
+                    ) {
+                        CheckoutScreen(
+                            orderId = key.orderId,
+                            gobacktoCart = {
+                                backStack.removeLastOrNull()
+                            },
+                            goHome = {
+                                backStack.clear()
+                                backStack.add(HomeScreenNK)
                             }
                         )
                     }

@@ -22,51 +22,116 @@ import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.NavigateNext
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import ord.ibda.vto.R
+import ord.ibda.vto.data.models.OrderProductDetail
+import ord.ibda.vto.ui.checkout.viewmodel.CheckoutEvent
+import ord.ibda.vto.ui.checkout.viewmodel.CheckoutViewModel
 import ord.ibda.vto.ui.theme.AppTheme
-
-data class CartItem(
-    val imageRes: Int,
-    val name: String,
-    val size: String,
-    val quantity: Int,
-    val price: Double
-)
+import java.text.NumberFormat
+import java.util.Locale
 
 @Composable
 fun CheckoutScreen(
+    orderId: Int,
+    gobacktoCart: () -> Unit,
+    goHome: () -> Unit,
+    checkoutViewModel: CheckoutViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
+    val checkoutState by checkoutViewModel.state.collectAsState()
+//    val snackbarHostState = remember { SnackbarHostState() }
 
-    val cartList = listOf(
-        CartItem(R.drawable.black_tank, "T12 Tank top", "XS", 2, 499.900),
-        CartItem(R.drawable.red_offshoulder, "T12 Tank top", "XS", 1, 499.900)
-    )
+//    LaunchedEffect(checkoutState.snackbarMessage) {
+//        checkoutState.snackbarMessage?.let { message ->
+//            snackbarHostState.showSnackbar(message)
+//            checkoutViewModel.onEvent(CheckoutEvent.ClearSnackbar)
+//        }
+//    }
+
+    LaunchedEffect(orderId) {
+        checkoutViewModel.onEvent(CheckoutEvent.LoadOrder(orderId))
+    }
+
+    val cartList = checkoutState.orderItems
 
     Scaffold(
+//        snackbarHost = {
+//            SnackbarHost(
+//                hostState = snackbarHostState,
+//                modifier = Modifier
+//                    .padding(bottom = 26.5.dp)
+//            ) { data ->
+//                Snackbar(
+//                    shape = RoundedCornerShape(4.dp),
+//                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+//                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(horizontal = 16.dp)
+//                        .shadow(8.dp, RoundedCornerShape(8.dp))
+//                ) {
+//                    Box(
+//                        modifier = Modifier.fillMaxWidth(),
+//                        contentAlignment = Alignment.Center
+//                    ) {
+//                        Text(
+//                            text = data.visuals.message,
+//                            style = MaterialTheme.typography.bodyMedium.copy(
+//                                fontWeight = FontWeight.Medium
+//                            )
+//                        )
+//                    }
+//                }
+//            }
+//        },
         bottomBar = {
-            PayOrder()
+            PayOrder(
+                totalPrice = checkoutState.totalPrice,
+                payOrder = {
+                    checkoutViewModel.onEvent(CheckoutEvent.PayOrder)
+                    goHome()
+                }
+            )
         }
     ) { innerPadding ->
         Column {
-            CheckoutHeader()
+            CheckoutHeader(
+                showConfirmation = {
+                    checkoutViewModel.onEvent(CheckoutEvent.ShowConfirmation)
+                }
+            )
             LazyColumn(
                 modifier = Modifier
                     .padding(innerPadding)
@@ -103,15 +168,31 @@ fun CheckoutScreen(
                 item { Divider() }
 
                 item {
-                    OrderSummary()
+                    OrderSummary(
+                        subtotal = checkoutState.subtotal,
+                        shippingCost = checkoutState.shippingCost
+                    )
                 }
             }
+        }
+        if (checkoutState.showConfirmationDialog) {
+            CancelOrderDialog(
+                onConfirm = {
+                    checkoutViewModel.onEvent(CheckoutEvent.HideConfirmation)
+                },
+                onDismiss = {
+                    checkoutViewModel.onEvent(CheckoutEvent.DeleteOrder)
+                    gobacktoCart()
+                }
+            )
         }
     }
 }
 
 @Composable
 fun PayOrder(
+    payOrder: () -> Unit,
+    totalPrice: Int,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -135,7 +216,7 @@ fun PayOrder(
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
                 Text(
-                    text = "1.049.800 IDR",
+                    text = "${"%,d".format(totalPrice)} IDR",
                     style = MaterialTheme.typography.titleLarge
                 )
             }
@@ -143,7 +224,7 @@ fun PayOrder(
             Spacer(modifier = Modifier.width(50.dp))
 
             Button(
-                onClick = { },
+                onClick = { payOrder() },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onPrimaryContainer),
                 shape = RoundedCornerShape(4.dp),
                 modifier = Modifier
@@ -165,6 +246,7 @@ fun PayOrder(
 
 @Composable
 fun CheckoutHeader(
+    showConfirmation: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -178,7 +260,7 @@ fun CheckoutHeader(
             contentDescription = "Back",
             modifier = Modifier
                 .size(32.dp)
-                .clickable {  }
+                .clickable { showConfirmation() }
         )
         Spacer(modifier = Modifier.width(24.dp))
         Text(
@@ -276,8 +358,16 @@ fun PromoColumn(
 
 @Composable
 fun OrderSummary(
+    subtotal: Int,
+    shippingCost: Int,
     modifier: Modifier = Modifier
 ) {
+    val subtotalFormattedPrice = NumberFormat.getNumberInstance(Locale("in", "ID"))
+        .format(subtotal)
+
+    val shippingCostFormattedPrice = NumberFormat.getNumberInstance(Locale("in", "ID"))
+        .format(shippingCost)
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -289,8 +379,8 @@ fun OrderSummary(
         )
         Spacer(modifier = Modifier.height(12.dp))
 
-        SummaryRow("Item subtotal", "999.800 IDR")
-        SummaryRow("Shipping", "50.000 IDR")
+        SummaryRow("Item subtotal", "$subtotalFormattedPrice IDR")
+        SummaryRow("Shipping", "$shippingCostFormattedPrice IDR")
         SummaryRow("VAT", "Included", valueStyle = MaterialTheme.typography.bodySmall)
     }
 }
@@ -317,27 +407,8 @@ fun SummaryRow(
 }
 
 @Composable
-fun CartItems(
-    modifier: Modifier = Modifier
-) {
-    val cartList = listOf(
-        CartItem(R.drawable.black_tank, "T12 Tank top", "XS", 2, 499.900),
-        CartItem(R.drawable.red_offshoulder, "T12 Tank top", "XS", 1, 499.900)
-    )
-
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(20.dp),
-        modifier = modifier.padding(horizontal = 20.dp, vertical = 30.dp)
-    ) {
-        items(cartList) { item ->
-            CartItemRow(item)
-        }
-    }
-}
-
-@Composable
 fun CartItemRow(
-    item: CartItem
+    item: OrderProductDetail
 ) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -355,28 +426,44 @@ fun CartItemRow(
             ) {
 
             }
-            Image(
-                painter = painterResource(id = item.imageRes),
-                contentDescription = null,
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(item.product.product_image)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = item.product.product_name,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(width = 150.dp, height = 200.dp)
             )
+//            Image(
+//                painter = painterResource(id = item.imageRes),
+//                contentDescription = null,
+//                contentScale = ContentScale.Crop,
+//                modifier = Modifier
+//                    .size(width = 150.dp, height = 200.dp)
+//            )
         }
+
+        val totalPriceFormattedPrice = NumberFormat.getNumberInstance(Locale("in", "ID"))
+            .format(item.price_at_purchase * item.quantity)
+
+        val priceFormattedPrice = NumberFormat.getNumberInstance(Locale("in", "ID"))
+            .format(item.price_at_purchase)
 
         Column(
             modifier = Modifier
                 .weight(1f)
         ) {
             Text(
-                text = "${String.format("%.3f", item.price)} IDR",
+                text = "$totalPriceFormattedPrice IDR",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
                     .padding(bottom = 10.dp)
             )
             Text(
-                text = item.name,
+                text = item.product.product_name,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
@@ -385,13 +472,7 @@ fun CartItemRow(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = item.size,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
                 if (item.quantity > 1) {
-                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "${item.quantity}x",
                         style = MaterialTheme.typography.bodySmall,
@@ -399,7 +480,7 @@ fun CartItemRow(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "${String.format("%.3f", (item.price / item.quantity))} IDR",
+                        text = "$priceFormattedPrice IDR",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
@@ -409,12 +490,66 @@ fun CartItemRow(
     }
 }
 
+@Composable
+fun CancelOrderDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Finish payment?",
+                style = MaterialTheme.typography.headlineSmall, // more prominent title
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        },
+        text = {
+            Text(
+                text = "Are you sure you want to go back? This will cancel your payment process.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ),
+                shape = RoundedCornerShape(4.dp),
+//                modifier = Modifier
+//                    .width(125.dp)
+            ) {
+                Text("Continue payment")
+            }
+        },
+        dismissButton = {
+            OutlinedButton(
+                onClick = onDismiss,
+                border = ButtonDefaults.outlinedButtonBorder,
+                shape = RoundedCornerShape(4.dp),
+//                modifier = Modifier
+//                    .width(75.dp)
+            ) {
+                Text(
+                    text = "Leave",
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.background,
+        shape = RoundedCornerShape(4.dp)
+    )
+}
 
 
 @Preview(showBackground = true)
 @Composable
 fun CheckoutScreenPreview() {
     AppTheme {
-        CheckoutScreen()
+        CheckoutScreen(orderId = 0, gobacktoCart = {}, goHome = {})
+//        CancelOrderDialog(onConfirm = {}, onDismiss = {})
     }
 }

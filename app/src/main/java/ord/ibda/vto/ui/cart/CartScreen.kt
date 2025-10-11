@@ -28,6 +28,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -52,15 +53,26 @@ import java.util.Locale
 @Composable
 fun CartScreen(
     cartViewModel: CartViewModel = hiltViewModel(),
+    goCheckoutScreen: (Int) -> Unit,
     bottomBar: @Composable () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val cartState by cartViewModel.state.collectAsState()
 
+    LaunchedEffect(cartState.orderId) {
+        cartState.orderId?.let { orderId ->
+            goCheckoutScreen(orderId)
+            cartViewModel.clearLastOrderId()
+        }
+    }
+
     Scaffold(
         bottomBar = {
             Column {
-                ProcessOrder(totalPrice = cartState.totalPrice)
+                ProcessOrder(
+                    totalPrice = cartState.totalPrice,
+                    onProcessOrder = { cartViewModel.onEvent(CartEvent.ProcessOrder) }
+                )
                 bottomBar()
             }
         }
@@ -266,7 +278,7 @@ fun CartItemRow(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "$formattedPrice IDR",
                             style = MaterialTheme.typography.labelMedium,
@@ -373,6 +385,7 @@ fun TotalDetails(
 @Composable
 fun ProcessOrder(
     totalPrice: Int,
+    onProcessOrder: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -396,7 +409,7 @@ fun ProcessOrder(
                     .padding(bottom = 30.dp)
             )
             Button(
-                onClick = { /* process order */ },
+                onClick = { onProcessOrder() },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onPrimaryContainer),
                 shape = RoundedCornerShape(4.dp),
                 modifier = Modifier
@@ -419,6 +432,6 @@ fun ProcessOrder(
 @Composable
 fun CartScreenPreview() {
     AppTheme {
-        CartScreen()
+        CartScreen(goCheckoutScreen = {})
     }
 }

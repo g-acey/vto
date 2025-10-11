@@ -12,8 +12,6 @@ import ord.ibda.vto.data.models.rooms.OrderTable
 @Dao
 interface OrderDao {
 
-    // --- ORDERS ---
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrder(order: OrderTable): Long
 
@@ -22,8 +20,6 @@ interface OrderDao {
 
     @Query("UPDATE OrderTable SET status = :status WHERE order_id = :orderId")
     suspend fun updateOrderStatus(orderId: Int, status: String)
-
-    // --- ORDER ITEMS ---
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrderItem(orderItem: OrderItemTable)
@@ -35,4 +31,7 @@ interface OrderDao {
         WHERE OrderItemTable.order_id = :orderId
     """)
     fun getOrderProducts(orderId: Int): Flow<List<OrderProductDetail>>
+
+    @Query("DELETE FROM OrderTable WHERE order_id = :orderId")
+    suspend fun deleteOrderById(orderId: Int)
 }
