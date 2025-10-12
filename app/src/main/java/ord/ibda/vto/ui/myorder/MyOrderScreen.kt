@@ -1,4 +1,4 @@
-package ord.ibda.vto.ui.myorders
+package ord.ibda.vto.ui.myorder
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,6 +27,7 @@ import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,30 +36,46 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import ord.ibda.vto.R
+import ord.ibda.vto.data.models.FullOrderWithDetails
+import ord.ibda.vto.data.models.OrderStatus
+import ord.ibda.vto.data.models.OrderWithItems
+import ord.ibda.vto.ui.myorder.viewmodel.MyOrderEvent
+import ord.ibda.vto.ui.myorder.viewmodel.MyOrderViewModel
 import ord.ibda.vto.ui.theme.AppTheme
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun MyOrdersScreen(
+    myOrderViewModel: MyOrderViewModel = hiltViewModel(),
+    onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val tabs = listOf("All", "In progress", "Complete")
-    var selectedTabIndex by remember { mutableStateOf(0) }
+    val myOrderState by myOrderViewModel.state.collectAsState()
 
-    val orders = listOf(
-        OrderItem(R.drawable.black_tank, "#092312332", "25/05/2025", "Estimated arrival on 28/05/2025", false),
-        OrderItem(R.drawable.red_offshoulder, "#092312332", "25/05/2025", "Delivered on 20/05/2025", true)
-    )
+    val tabs = listOf(OrderStatus.ALL, OrderStatus.IN_PROGRESS, OrderStatus.COMPLETE)
+    var selectedTabIndex = tabs.indexOf(myOrderState.orderStatus)
+
+//    val orders = listOf(
+//        OrderItem(R.drawable.black_tank, "#092312332", "25/05/2025", "Estimated arrival on 28/05/2025", false),
+//        OrderItem(R.drawable.red_offshoulder, "#092312332", "25/05/2025", "Delivered on 20/05/2025", true)
+//    )
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .padding(top = 25.dp)
     ) {
-        // Top App Bar
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(vertical = 20.dp, horizontal = 20.dp)
@@ -68,7 +85,7 @@ fun MyOrdersScreen(
                 contentDescription = "Back",
                 modifier = Modifier
                     .size(32.dp)
-                    .clickable { /* Navigate back */ }
+                    .clickable { onBack() }
             )
             Spacer(modifier = Modifier.width(24.dp))
             Text(
@@ -77,7 +94,6 @@ fun MyOrdersScreen(
             )
         }
 
-        // Tabs
         TabRow(
             selectedTabIndex = selectedTabIndex,
             containerColor = Color.Transparent,
@@ -98,43 +114,66 @@ fun MyOrdersScreen(
                 Tab(
                     text = {
                         Text(
-                            text = tab,
+                            text = tab.name.replace("_", " ").lowercase()
+                                .replaceFirstChar { it.uppercase() },
                             style = MaterialTheme.typography.labelLarge.copy(
                                 fontSize = 16.sp
                             )
                         )
                     },
                     selected = selectedTabIndex == index,
-                    onClick = { selectedTabIndex = index }
+                    onClick = { myOrderViewModel.onEvent(MyOrderEvent.SortOrders(tab)) }
                 )
             }
         }
 
-        // Order List
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            itemsIndexed(orders) { index, order ->
-                OrderCard(order)
-                if (index < orders.lastIndex) {
-                    Divider()
+        if (myOrderState.orders.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "No orders found",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                )
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                itemsIndexed(myOrderState.orders) { index, order ->
+                    OrderCard(order)
+                    if (index < myOrderState.orders.lastIndex) {
+                        Divider()
+                    }
                 }
             }
         }
     }
 }
 
-data class OrderItem(
-    val imageRes: Int,
-    val orderNumber: String,
-    val date: String,
-    val statusText: String,
-    val delivered: Boolean
-)
+//data class OrderItem(
+//    val imageRes: Int,
+//    val orderNumber: String,
+//    val date: String,
+//    val statusText: String,
+//    val delivered: Boolean
+//)
 
 @Composable
-fun OrderCard(order: OrderItem) {
+fun OrderCard(order: FullOrderWithDetails) {
+    val dateFormat = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
+    val orderDate = dateFormat.format(Date(order.order.order_date))
+
+    val statusText = when (order.order.status) {
+        "In Progress" -> "Estimated arrival: ${order.order.estimated_arrival ?: "3-5 business days"}"
+        "Complete" -> "Delivered"
+        else -> "Unknown"
+    }
+
     Row(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier
@@ -142,23 +181,47 @@ fun OrderCard(order: OrderItem) {
             .clickable {  }
             .padding(vertical = 26.dp, horizontal = 20.dp)
     ) {
+//        Box(
+//            modifier = Modifier
+//        ) {
+//            Box(
+//                modifier = Modifier
+//                    .size(width = 150.dp, height = 200.dp)
+//                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+//            ) {
+//
+//            }
+//            Image(
+//                painter = painterResource(id = order.imageRes),
+//                contentDescription = null,
+//                contentScale = ContentScale.Crop,
+//                modifier = Modifier
+//                    .size(width = 150.dp, height = 200.dp)
+//            )
+//        }
         Box(
             modifier = Modifier
+                .size(width = 150.dp, height = 200.dp)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(width = 150.dp, height = 200.dp)
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-            ) {
-
+            val firstItem = order.items.firstOrNull()
+            if (firstItem != null) {
+//                Image(
+//                    painter = rememberAsyncImagePainter(firstItem.product.image_url),
+//                    contentDescription = null,
+//                    contentScale = ContentScale.Crop,
+//                    modifier = Modifier.fillMaxSize()
+//                )
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(firstItem.product.product_image)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = firstItem.product.product_name,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
             }
-            Image(
-                painter = painterResource(id = order.imageRes),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(width = 150.dp, height = 200.dp)
-            )
         }
 
         Column(
@@ -166,23 +229,23 @@ fun OrderCard(order: OrderItem) {
                 .weight(1f)
         ) {
             Text(
-                text = order.orderNumber,
+                text = "#${order.order.order_id}",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
                     .padding(bottom = 10.dp)
             )
             Text(
-                text = order.date,
+                text = orderDate,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
                     .padding(bottom = 10.dp)
             )
             Text(
-                text = order.statusText,
+                text = statusText,
                 style = MaterialTheme.typography.labelSmall.copy(
-                    color = if (order.delivered) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onErrorContainer,
+                    color = if (order.order.status == "Complete") MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onErrorContainer,
                 ),
                 modifier = Modifier.padding(top = 16.dp)
             )
@@ -194,6 +257,6 @@ fun OrderCard(order: OrderItem) {
 @Composable
 fun MyOrderScreenPreview() {
     AppTheme {
-        MyOrdersScreen()
+        MyOrdersScreen(onBack = {})
     }
 }

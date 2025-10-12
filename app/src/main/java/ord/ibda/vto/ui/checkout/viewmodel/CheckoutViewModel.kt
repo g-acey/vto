@@ -70,11 +70,10 @@ class CheckoutViewModel @Inject constructor(
             val orderId = _state.value.orderId ?: return@launch
             val userId = currentUserId ?: return@launch
 
+            orderDao.updateOrderStatus(orderId = orderId, "In Progress")
             cartDao.clearCart(userId)
 
-            _state.update {
-                it.copy(snackbarMessage = "Order successfully made!")
-            }
+            _state.value = _state.value.copy(snackbarMessage = "Order successfully made!")
 
         }
     }
@@ -92,6 +91,12 @@ class CheckoutViewModel @Inject constructor(
             val orderId = _state.value.orderId ?: return@launch
             orderDao.deleteOrderById(orderId)
             _state.value = _state.value.copy(showConfirmationDialog = false)
+        }
+    }
+
+    fun cleanupAbandonedOrders() {
+        viewModelScope.launch {
+            orderDao.deleteAbandonedOrders()
         }
     }
 }

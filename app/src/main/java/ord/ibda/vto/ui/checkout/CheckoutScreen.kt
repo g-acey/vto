@@ -1,5 +1,6 @@
 package ord.ibda.vto.ui.checkout
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -75,6 +76,10 @@ fun CheckoutScreen(
 ) {
     val checkoutState by checkoutViewModel.state.collectAsState()
 
+    BackHandler(enabled = true) {
+        checkoutViewModel.onEvent(CheckoutEvent.ShowConfirmation)
+    }
+
     LaunchedEffect(orderId) {
         checkoutViewModel.onEvent(CheckoutEvent.LoadOrder(orderId))
     }
@@ -119,7 +124,9 @@ fun CheckoutScreen(
                     goHome()
                 }
             )
-        }
+        },
+        modifier = modifier
+            .padding(top = 25.dp)
     ) { innerPadding ->
         Column {
             CheckoutHeader(

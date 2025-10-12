@@ -8,3 +8,4 @@ data class OrderProductDetail(
     val quantity: Int,
     val price_at_purchase: Int
 )
+

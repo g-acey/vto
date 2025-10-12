@@ -69,10 +69,12 @@ fun CartScreen(
     Scaffold(
         bottomBar = {
             Column {
-                ProcessOrder(
-                    totalPrice = cartState.totalPrice,
-                    onProcessOrder = { cartViewModel.onEvent(CartEvent.ProcessOrder) }
-                )
+                if (cartState.itemCount > 0) {
+                    ProcessOrder(
+                        totalPrice = cartState.totalPrice,
+                        onProcessOrder = { cartViewModel.onEvent(CartEvent.ProcessOrder) }
+                    )
+                }
                 bottomBar()
             }
         }

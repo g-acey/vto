@@ -104,7 +104,7 @@ class CartViewModel @Inject constructor(
             val orderId = orderDao.insertOrder(
                 OrderTable(
                     user_id = userId,
-                    status = "In Progress",
+                    status = null,
                     estimated_arrival = "3-5 Business Days"
                 )
             )

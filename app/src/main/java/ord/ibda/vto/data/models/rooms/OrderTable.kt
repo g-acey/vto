@@ -19,7 +19,7 @@ import androidx.room.PrimaryKey
 data class OrderTable(
     val user_id: Int,
     val order_date: Long = System.currentTimeMillis(),
-    val status: String = "In Progress",
+    val status: String? = null,
     val estimated_arrival: String? = null,
     @PrimaryKey(autoGenerate = true)
     val order_id: Int = 0,

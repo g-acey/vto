@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -38,7 +37,7 @@ import ord.ibda.vto.ui.checkout.viewmodel.CheckoutViewModel
 import ord.ibda.vto.ui.component.BottomNavigationBar
 import ord.ibda.vto.ui.component.LoadingScreen
 import ord.ibda.vto.ui.editprofile.EditProfileScreen
-import ord.ibda.vto.ui.myorders.MyOrdersScreen
+import ord.ibda.vto.ui.myorder.MyOrdersScreen
 import ord.ibda.vto.ui.productdetails.ProductDetailsScreen
 import ord.ibda.vto.ui.profile.ProfileScreen
 import ord.ibda.vto.ui.session.viewmodel.SessionViewModel
@@ -99,6 +98,10 @@ fun NavigationRoot(
         WelcomeScreenNK
     }
      val backStack = rememberNavBackStack(startDestination)
+
+    LaunchedEffect(Unit) {
+        checkoutViewModel.cleanupAbandonedOrders()
+    }
 
     LaunchedEffect(checkoutState.snackbarMessage) {
         checkoutState.snackbarMessage?.let { message ->
@@ -273,7 +276,11 @@ fun NavigationRoot(
                         NavEntry(
                             key = key
                         ) {
-                            MyOrdersScreen()
+                            MyOrdersScreen(
+                                onBack = {
+                                    backStack.removeLastOrNull()
+                                }
+                            )
                         }
                     }
 
