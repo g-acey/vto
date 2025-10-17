@@ -44,5 +44,8 @@ interface CartDao {
 
     @Query("UPDATE CartTable SET quantity = :newQuantity WHERE cart_id = :cartId")
     suspend fun updateQuantity(cartId: Int, newQuantity: Int)
+
+    @Query("SELECT * FROM CartTable WHERE cart_id = :cartId AND user_id = :userId LIMIT 1")
+    suspend fun getCartItemById(cartId: Int, userId: Int): CartTable?
 }
 

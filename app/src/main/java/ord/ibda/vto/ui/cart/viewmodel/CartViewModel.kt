@@ -3,8 +3,10 @@ package ord.ibda.vto.ui.cart.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import ord.ibda.vto.data.db.CartDao
 import ord.ibda.vto.data.db.OrderDao
@@ -25,12 +27,20 @@ class CartViewModel @Inject constructor(
     val state: StateFlow<CartState> = _state
 
     private var currentUserId: Int? = null
+    private var cartCollectionJob: Job? = null
 
     init {
         viewModelScope.launch {
             sessionManager.loggedInUserId.collect { id ->
                 currentUserId = id
-                if (id != null) onEvent(CartEvent.LoadCart)
+                cartCollectionJob?.cancel()
+
+                if (id != null) {
+                    _state.value = _state.value.copy(isLoading = true)
+                    loadCart()
+                } else {
+                    _state.value = CartState()
+                }
             }
         }
     }
@@ -47,50 +57,56 @@ class CartViewModel @Inject constructor(
 
     private fun loadCart() {
         val userId = currentUserId ?: return
-        viewModelScope.launch {
-            _state.value = _state.value.copy(isLoading = true)
+        cartCollectionJob?.cancel() // cancel old collectors before starting new one
 
-            launch {
-                cartDao.getCartItems(userId).collect { items ->
-                    _state.value = _state.value.copy(cartItems = items)
-                }
+        cartCollectionJob = viewModelScope.launch {
+            combine(
+                cartDao.getCartItems(userId),
+                cartDao.getCartTotalPrice(userId),
+                cartDao.getCartItemCount(userId)
+            ) { items, total, count ->
+                Triple(items, total ?: 0, count)
+            }.collect { (items, total, count) ->
+                _state.value = _state.value.copy(
+                    cartItems = items,
+                    totalPrice = total,
+                    itemCount = count,
+                    isLoading = false
+                )
             }
-            launch {
-                cartDao.getCartTotalPrice(userId).collect { total ->
-                    _state.value = _state.value.copy(totalPrice = total ?: 0)
-                }
-            }
-            launch {
-                cartDao.getCartItemCount(userId).collect { count ->
-                    _state.value = _state.value.copy(itemCount = count)
-                }
-            }
-
-            _state.value = _state.value.copy(isLoading = false)
         }
     }
 
     private fun updateQuantity(cartId: Int, delta: Int) {
         viewModelScope.launch {
             val userId = currentUserId ?: return@launch
-            val item = _state.value.cartItems.find { it.cart_id == cartId } ?: return@launch
-            val newQuantity = (item.quantity + delta).coerceAtLeast(1)
-            cartDao.updateQuantity(cartId, newQuantity)
+//            val item = _state.value.cartItems.find { it.cart_id == cartId } ?: return@launch
+//            val newQuantity = (item.quantity + delta).coerceAtLeast(1)
+//            cartDao.updateQuantity(cartId, newQuantity)
+            val currentItem = cartDao.getCartItemById(cartId, userId)
+            if (currentItem != null) {
+                val newQuantity = (currentItem.quantity + delta).coerceAtLeast(1)
+                cartDao.updateQuantity(cartId, newQuantity)
+            }
         }
     }
 
     private fun deleteItem(cartId: Int) {
         viewModelScope.launch {
             val userId = currentUserId ?: return@launch
-            val item = _state.value.cartItems.find { it.cart_id == cartId } ?: return@launch
-            cartDao.deleteCartItem(
-                CartTable(
-                    cart_id = cartId,
-                    user_id = userId,
-                    product_id = item.product.product_id,
-                    quantity = item.quantity
-                )
-            )
+//            val item = _state.value.cartItems.find { it.cart_id == cartId } ?: return@launch
+//            cartDao.deleteCartItem(
+//                CartTable(
+//                    cart_id = cartId,
+//                    user_id = userId,
+//                    product_id = item.product.product_id,
+//                    quantity = item.quantity
+//                )
+//            )
+            val item = cartDao.getCartItemById(cartId, userId)
+            if (item != null) {
+                cartDao.deleteCartItem(item)
+            }
         }
     }
 
