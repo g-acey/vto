@@ -1,5 +1,7 @@
 package ord.ibda.vto.ui.editprofile
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -21,6 +24,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,114 +33,156 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import ord.ibda.vto.R
+import ord.ibda.vto.ui.editprofile.viewmodel.EditProfileEvent
+import ord.ibda.vto.ui.editprofile.viewmodel.EditProfileViewModel
 import ord.ibda.vto.ui.theme.AppTheme
 
 @Composable
 fun EditProfileScreen(
+    goBack: () -> Unit,
+    goProfile: () -> Unit,
+    editProfileViewModel: EditProfileViewModel,
     modifier: Modifier = Modifier
 ) {
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var birthday by remember { mutableStateOf("") }
-    var gender by remember { mutableStateOf("") }
+    val editProfileState by editProfileViewModel.state.collectAsState()
+
+    LaunchedEffect(Unit) {
+        editProfileViewModel.onEvent(EditProfileEvent.LoadUserProfile)
+    }
 
     Scaffold(
         bottomBar = {
-            Button(
-                onClick = { /* Save action */ },
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF001633)),
-                shape = RoundedCornerShape(6.dp)
+                    .padding(horizontal = 20.dp, vertical = 30.dp)
             ) {
-                Text(
-                    text = "Save",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                )
+                Button(
+                    onClick = {
+                        editProfileViewModel.onEvent(EditProfileEvent.SaveProfile)
+                        goProfile()
+                    },
+                    enabled = editProfileState.canSave,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(53.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onPrimaryContainer),
+                    shape = RoundedCornerShape(4.dp)
+                ) {
+                    Text(
+                        text = "Save",
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
-        }
+        },
+        modifier = Modifier
+            .padding(top = 25.dp)
     ) { innerPadding ->
         Column(
             modifier = modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 20.dp, vertical = 24.dp)
+                .padding(horizontal = 20.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = { /* Back action */ }) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                }
-                Spacer(modifier = Modifier.width(8.dp))
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clickable { goBack() }
+                )
+                Spacer(modifier = Modifier.width(24.dp))
                 Text(
-                    text = "Personal details",
-                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
+                    text = "Personal Details",
+                    style = MaterialTheme.typography.displaySmall
                 )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             OutlinedTextField(
-                value = username,
-                onValueChange = { username = it },
+                value = editProfileState.username,
+                onValueChange = { editProfileViewModel.onEvent(EditProfileEvent.UpdateUsername(it)) },
                 label = { Text("Username") },
+                isError = editProfileState.isErrorUsername,
+                supportingText = {
+                    if (editProfileState.isErrorUsername) {
+                        Text(text = "* Username already taken")
+                    }
+                },
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
+                value = editProfileState.password,
+                onValueChange = { editProfileViewModel.onEvent(EditProfileEvent.UpdatePassword(it)) },
                 label = { Text("Password") },
+                isError = editProfileState.isErrorPassword,
                 modifier = Modifier.fillMaxWidth(),
-                visualTransformation = PasswordVisualTransformation()
+                singleLine = true,
+                maxLines = 1,
+                supportingText = {
+                    if (editProfileState.isErrorPassword) {
+                        Text(
+                            text = stringResource(R.string.password_criteria)
+                        )
+                    }
+                }
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                placeholder = { Text("Email") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                OutlinedTextField(
-                    value = birthday,
-                    onValueChange = { birthday = it },
-                    placeholder = { Text("Birthday") },
-                    modifier = Modifier.weight(1f)
-                )
-                OutlinedTextField(
-                    value = gender,
-                    onValueChange = { gender = it },
-                    placeholder = { Text("Gender") },
-                    modifier = Modifier.weight(1f)
-                )
-            }
+//            Spacer(modifier = Modifier.height(16.dp))
+//
+//            OutlinedTextField(
+//                value = email,
+//                onValueChange = { email = it },
+//                placeholder = { Text("Email") },
+//                modifier = Modifier.fillMaxWidth()
+//            )
+//
+//            Spacer(modifier = Modifier.height(16.dp))
+//
+//            Row(
+//                horizontalArrangement = Arrangement.spacedBy(16.dp),
+//                modifier = Modifier.fillMaxWidth()
+//            ) {
+//                OutlinedTextField(
+//                    value = birthday,
+//                    onValueChange = { birthday = it },
+//                    placeholder = { Text("Birthday") },
+//                    modifier = Modifier.weight(1f)
+//                )
+//                OutlinedTextField(
+//                    value = gender,
+//                    onValueChange = { gender = it },
+//                    placeholder = { Text("Gender") },
+//                    modifier = Modifier.weight(1f)
+//                )
+//            }
         }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun EditProfileScreenPreview() {
-    AppTheme {
-        EditProfileScreen()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun EditProfileScreenPreview() {
+//    AppTheme {
+//        EditProfileScreen(goBack = {})
+//    }
+//}

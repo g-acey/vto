@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
+import ord.ibda.vto.data.models.FullOrderWithDetails
 import ord.ibda.vto.data.models.OrderProductDetail
 import ord.ibda.vto.data.models.OrderWithItems
 import ord.ibda.vto.data.models.rooms.OrderItemTable
@@ -59,4 +60,7 @@ interface OrderDao {
 
     @Query("UPDATE OrderTable SET status = :newStatus WHERE order_id = :orderId")
     suspend fun updateOrderStatus(orderId: Int, newStatus: String)
+
+    @Query("SELECT * FROM OrderTable WHERE order_id = :orderId LIMIT 1")
+    suspend fun getOrderById(orderId: Int): OrderTable?
 }

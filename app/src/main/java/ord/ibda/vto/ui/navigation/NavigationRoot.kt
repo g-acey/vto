@@ -37,7 +37,10 @@ import ord.ibda.vto.ui.checkout.viewmodel.CheckoutViewModel
 import ord.ibda.vto.ui.component.BottomNavigationBar
 import ord.ibda.vto.ui.component.LoadingScreen
 import ord.ibda.vto.ui.editprofile.EditProfileScreen
+import ord.ibda.vto.ui.editprofile.viewmodel.EditProfileEvent
+import ord.ibda.vto.ui.editprofile.viewmodel.EditProfileViewModel
 import ord.ibda.vto.ui.myorder.MyOrdersScreen
+import ord.ibda.vto.ui.orderdetails.OrderDetailsScreen
 import ord.ibda.vto.ui.productdetails.ProductDetailsScreen
 import ord.ibda.vto.ui.profile.ProfileScreen
 import ord.ibda.vto.ui.session.viewmodel.SessionViewModel
@@ -74,17 +77,22 @@ data object EditProfileScreenNK: NavKey
 @Serializable
 data object MyOrdersScreenNK: NavKey
 
+@Serializable
+data class OrderDetailsScreenNK(val orderId: Int): NavKey
+
 @Composable
 fun NavigationRoot(
     modifier: Modifier = Modifier,
     sessionViewModel: SessionViewModel = hiltViewModel(),
     cartViewModel: CartViewModel = hiltViewModel(),
-    checkoutViewModel: CheckoutViewModel = hiltViewModel()
+    checkoutViewModel: CheckoutViewModel = hiltViewModel(),
+    editProfileViewModel: EditProfileViewModel = hiltViewModel()
 ) {
     val loggedInUserId by sessionViewModel.loggedInUserId.collectAsState()
     val isInitialized by sessionViewModel.isInitialized.collectAsState()
     val cartState by cartViewModel.state.collectAsState()
     val checkoutState by checkoutViewModel.state.collectAsState()
+    val editProfileState by editProfileViewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     if (!isInitialized) {
@@ -107,6 +115,13 @@ fun NavigationRoot(
         checkoutState.snackbarMessage?.let { message ->
             snackbarHostState.showSnackbar(message)
             checkoutViewModel.onEvent(CheckoutEvent.ClearSnackbar)
+        }
+    }
+
+    LaunchedEffect(editProfileState.successMessage) {
+        editProfileState.successMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            editProfileViewModel.onEvent(EditProfileEvent.ClearMessage)
         }
     }
 
@@ -259,6 +274,9 @@ fun NavigationRoot(
                                 },
                                 goEditProfile = {
                                     backStack.add(EditProfileScreenNK)
+                                },
+                                goBack = {
+                                    backStack.removeLastOrNull()
                                 }
                             )
                         }
@@ -268,7 +286,15 @@ fun NavigationRoot(
                         NavEntry(
                             key = key
                         ) {
-                            EditProfileScreen()
+                            EditProfileScreen(
+                                editProfileViewModel = editProfileViewModel,
+                                goBack = {
+                                    backStack.removeLastOrNull()
+                                },
+                                goProfile = {
+                                    backStack.removeLastOrNull()
+                                }
+                            )
                         }
                     }
 
@@ -279,7 +305,23 @@ fun NavigationRoot(
                             MyOrdersScreen(
                                 onBack = {
                                     backStack.removeLastOrNull()
+                                },
+                                goOrderDetails = { orderId ->
+                                    backStack.add(OrderDetailsScreenNK(orderId))
                                 }
+                            )
+                        }
+                    }
+
+                    is OrderDetailsScreenNK -> {
+                        NavEntry(
+                            key = key
+                        ) {
+                            OrderDetailsScreen(
+                                orderId = key.orderId,
+                                onBack = {
+                                    backStack.removeLastOrNull()
+                                },
                             )
                         }
                     }

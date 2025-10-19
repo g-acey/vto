@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.CreditCard
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.HelpOutline
@@ -33,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ord.ibda.vto.ui.profile.viewmodel.ProfileEvent
 import ord.ibda.vto.ui.profile.viewmodel.ProfileViewModel
@@ -44,6 +47,7 @@ fun ProfileScreen(
     onLogout: () -> Unit,
     goEditProfile: () -> Unit,
     goOrders: () -> Unit,
+    goBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val profileState by profileViewModel.state.collectAsState()
@@ -57,28 +61,46 @@ fun ProfileScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainerLow)
     ) {
-        Spacer(modifier = Modifier.height(50.dp))
+        Spacer(modifier = Modifier.height(55.dp))
 
-        // Header
-        Text(
-            text = "Hi ${profileState.username}",
-            style = MaterialTheme.typography.displaySmall,
-            color = MaterialTheme.colorScheme.onSecondaryContainer,
+        Row(
+            verticalAlignment = Alignment.Top,
             modifier = Modifier
+                .fillMaxWidth()
                 .padding(horizontal = 20.dp)
-        )
-        Spacer(modifier = Modifier.height(5.dp))
-        Text(
-            text = "Settings and all account details",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier
-                .padding(horizontal = 20.dp)
-        )
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+            ) {
+                Text(
+                    text = "Hi ${profileState.username}",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontSize = 30.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier
+
+                )
+                Text(
+                    text = "Settings and all account details",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                )
+            }
+            Icon(
+                imageVector = Icons.Outlined.Close,
+                contentDescription = "Close Profile",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .size(32.dp)
+                    .clickable { goBack() }
+            )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Menu Items
         ProfileMenuItem(
             Icons.Outlined.ListAlt,
             "My orders",
@@ -106,7 +128,6 @@ fun ProfileScreen(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // Footer
         Divider()
         Spacer(modifier = Modifier.height(16.dp))
         Text(
@@ -165,10 +186,10 @@ fun ProfileMenuItem(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun ProfileScreenPreview() {
-    AppTheme {
-        ProfileScreen(onLogout = {}, goEditProfile = {}, goOrders = {})
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun ProfileScreenPreview() {
+//    AppTheme {
+//        ProfileScreen(onLogout = {}, goEditProfile = {}, goOrders = {})
+//    }
+//}

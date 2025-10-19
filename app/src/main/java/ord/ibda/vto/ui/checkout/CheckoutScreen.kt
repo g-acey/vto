@@ -130,6 +130,7 @@ fun CheckoutScreen(
     ) { innerPadding ->
         Column {
             CheckoutHeader(
+                title = "Checkout",
                 showConfirmation = {
                     checkoutViewModel.onEvent(CheckoutEvent.ShowConfirmation)
                 }
@@ -248,6 +249,7 @@ fun PayOrder(
 
 @Composable
 fun CheckoutHeader(
+    title: String,
     showConfirmation: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -266,7 +268,7 @@ fun CheckoutHeader(
         )
         Spacer(modifier = Modifier.width(24.dp))
         Text(
-            text = "Checkout",
+            text = title,
             style = MaterialTheme.typography.displaySmall
         )
     }
@@ -280,7 +282,7 @@ fun AddressColumn(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 16.dp)
+            .padding(end = 20.dp, start = 20.dp, bottom = 16.dp)
     ) {
         Column(
             modifier = Modifier

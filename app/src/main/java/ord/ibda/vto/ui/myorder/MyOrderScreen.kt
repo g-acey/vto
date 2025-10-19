@@ -59,6 +59,7 @@ import java.util.Locale
 fun MyOrdersScreen(
     myOrderViewModel: MyOrderViewModel = hiltViewModel(),
     onBack: () -> Unit,
+    goOrderDetails: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val myOrderState by myOrderViewModel.state.collectAsState()
@@ -145,7 +146,10 @@ fun MyOrdersScreen(
                     .fillMaxSize()
             ) {
                 itemsIndexed(myOrderState.orders) { index, order ->
-                    OrderCard(order)
+                    OrderCard(
+                        order = order,
+                        onClick = { goOrderDetails(order.order.order_id) }
+                    )
                     if (index < myOrderState.orders.lastIndex) {
                         Divider()
                     }
@@ -164,7 +168,10 @@ fun MyOrdersScreen(
 //)
 
 @Composable
-fun OrderCard(order: FullOrderWithDetails) {
+fun OrderCard(
+    order: FullOrderWithDetails,
+    onClick: () -> Unit
+) {
     val dateFormat = remember { SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()) }
     val orderDate = dateFormat.format(Date(order.order.order_date))
 
@@ -178,7 +185,7 @@ fun OrderCard(order: FullOrderWithDetails) {
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .clickable {  }
+            .clickable { onClick() }
             .padding(vertical = 26.dp, horizontal = 20.dp)
     ) {
 //        Box(
@@ -253,10 +260,10 @@ fun OrderCard(order: FullOrderWithDetails) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun MyOrderScreenPreview() {
-    AppTheme {
-        MyOrdersScreen(onBack = {})
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun MyOrderScreenPreview() {
+//    AppTheme {
+//        MyOrdersScreen(onBack = {})
+//    }
+//}
