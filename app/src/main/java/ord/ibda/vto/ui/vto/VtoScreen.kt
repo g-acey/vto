@@ -1,5 +1,10 @@
 package ord.ibda.vto.ui.vto
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -26,21 +31,58 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
+import androidx.hilt.navigation.compose.hiltViewModel
 import ord.ibda.vto.ui.theme.AppTheme
+import ord.ibda.vto.ui.vto.viewmodel.VtoEvent
+import ord.ibda.vto.ui.vto.viewmodel.VtoViewModel
+import java.io.File
 
 
 @Composable
 fun VtoScreen(
+    vtoViewModel: VtoViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
-    onTryOutClick: () -> Unit = {},
-    onOpenCameraClick: () -> Unit = {}
+    onBack: () -> Unit,
+    onTryOutClick: () -> Unit,
 ) {
+    val vtoState by vtoViewModel.state.collectAsState()
+
+    val context = LocalContext.current
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri ->
+            uri?.let { vtoViewModel.onEvent(VtoEvent.SetUserImage(it.toString())) }
+        }
+    )
+
+    fun saveBitmapToCache(context: Context, bitmap: Bitmap): Uri {
+        val file = File(context.cacheDir, "captured_${System.currentTimeMillis()}.jpg")
+        file.outputStream().use { out ->
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+        }
+        return file.toUri()
+    }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicturePreview(),
+        onResult = { bitmap ->
+            bitmap?.let {
+                val uri = saveBitmapToCache(context, it)
+                vtoViewModel.onEvent(VtoEvent.SetUserImage(uri.toString()))
+            }
+        }
+    )
+
     Scaffold(
         bottomBar = {
             Surface(
@@ -57,7 +99,8 @@ fun VtoScreen(
                         .padding(20.dp)
                 ) {
                     Button(
-                        onClick = { onTryOutClick },
+                        onClick = { onTryOutClick() },
+                        enabled = vtoState.userImageUri != null,
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onPrimaryContainer),
                         shape = RoundedCornerShape(4.dp),
                         modifier = Modifier
@@ -74,7 +117,8 @@ fun VtoScreen(
                     }
                 }
             }
-        }
+        },
+        modifier = modifier
     ) { contentPadding ->
         Column(
             modifier = modifier
@@ -83,7 +127,7 @@ fun VtoScreen(
                 .padding(contentPadding)
                 .padding(horizontal = 20.dp)
         ) {
-            VtoHeader()
+            VtoHeader(onBack = onBack)
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -108,7 +152,7 @@ fun VtoScreen(
                     .fillMaxWidth()
                     .height(400.dp)
                     .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .clickable { /* Upload photo */ },
+                    .clickable { imagePicker.launch("image/*") },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -120,7 +164,6 @@ fun VtoScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Divider with OR
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
@@ -136,7 +179,7 @@ fun VtoScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = onOpenCameraClick,
+                onClick = { cameraLauncher.launch(null) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(53.dp),
@@ -162,6 +205,7 @@ fun VtoScreen(
 
 @Composable
 fun VtoHeader(
+    onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -175,7 +219,7 @@ fun VtoHeader(
             contentDescription = "Back",
             modifier = Modifier
                 .size(32.dp)
-                .clickable { }
+                .clickable { onBack() }
         )
         Spacer(modifier = Modifier.width(24.dp))
         Text(
@@ -185,10 +229,10 @@ fun VtoHeader(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun VtoScreenPreview() {
-    AppTheme {
-        VtoScreen()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun VtoScreenPreview() {
+//    AppTheme {
+//        VtoScreen()
+//    }
+//}

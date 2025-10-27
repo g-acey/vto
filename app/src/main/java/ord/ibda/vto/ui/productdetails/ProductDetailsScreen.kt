@@ -1,6 +1,8 @@
 package ord.ibda.vto.ui.productdetails
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
@@ -48,6 +50,7 @@ import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,6 +70,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -83,6 +87,7 @@ fun ProductDetailsScreen(
     productId: Int,
     onBack: () -> Unit,
     onGoToCart: () -> Unit,
+    onTryOnClick: (Int) -> Unit,
     productDetailsViewModel: ProductDetailsViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
@@ -124,7 +129,8 @@ fun ProductDetailsScreen(
                 ) {
                     PartialBottomSheet(
                         onBack = onBack,
-                        product = product
+                        product = product,
+                        onTryOnClick = onTryOnClick
                     )
                 }
 
@@ -442,31 +448,141 @@ fun BsContent(
     }
 }
 
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Composable
+//fun PartialBottomSheet(
+//    onBack: () -> Unit,
+//    product: ProductTable,
+//    onTryOnClick: (Int) -> Unit,
+//    modifier: Modifier = Modifier
+//) {
+//
+//    val scaffoldState = rememberBottomSheetScaffoldState()
+//
+//    BottomSheetScaffold(
+//        scaffoldState = scaffoldState,
+//        sheetContent = {
+//            BsContent(
+//                product = product
+//            )
+//        },
+//        sheetPeekHeight = 100.dp,
+//        sheetShape = RoundedCornerShape(0.dp)
+//    ) {
+//        Box(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .background(color = MaterialTheme.colorScheme.surfaceVariant)
+//        ) {
+//            AsyncImage(
+//                model = ImageRequest.Builder(LocalContext.current)
+//                    .data(product.product_image)
+//                    .crossfade(true)
+//                    .build(),
+//                contentDescription = product.product_name,
+//                contentScale = ContentScale.Crop,
+//                modifier = Modifier
+//                    .fillMaxSize()
+//                    .aspectRatio(1 / 2f)
+//                    .absoluteOffset(x = 0.dp, y = (-25).dp)
+//            )
+////            Image(
+////                painter = painterResource(id = R.drawable.teen),
+////                contentDescription = "Product image",
+////                modifier = Modifier
+////                    .fillMaxSize()
+////                    .aspectRatio(1 / 2f)
+////                    .graphicsLayer(scaleX = 1.35f, scaleY = 1.35f)
+////                    .absoluteOffset(x = 0.dp, y = (-75).dp)
+////            )
+//            Box(
+//                modifier = Modifier
+//                    .align(Alignment.TopStart)
+//                    .padding(top = 32.dp, start = 16.dp)
+//                    .size(40.dp)
+//                    .clip(RoundedCornerShape(4.dp))
+//                    .clickable(
+//                        interactionSource = remember { MutableInteractionSource() },
+//                        indication = LocalIndication.current
+//                    ) {
+//                        onBack()
+//                    },
+//                contentAlignment = Alignment.Center
+//            ) {
+//                Icon(
+//                    imageVector = Icons.Default.ArrowBack,
+//                    contentDescription = "Back",
+//                    tint = MaterialTheme.colorScheme.onSurface,
+//                    modifier = Modifier
+//                        .size(32.dp)
+//                )
+//            }
+////            Box(
+////                modifier = Modifier
+////                    .fillMaxWidth()
+////                    .height(670.dp)
+////            ) {
+////                FloatingActionButton(
+////                    onClick = { onTryOnClick(product.product_id) },
+////                    shape = RoundedCornerShape(4.dp),
+////                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+////                    contentColor = MaterialTheme.colorScheme.onSurface,
+////                    modifier = Modifier
+////                        .align(Alignment.BottomEnd)
+////                        .padding(horizontal = 20.dp, vertical = 12.dp)
+////                ) {
+////                    Icon(
+////                        imageVector = Icons.Rounded.CenterFocusWeak,
+////                        contentDescription = "Virtual clothes try-on icon",
+////                        modifier = Modifier
+////                            .size(30.dp)
+////                    )
+////                }
+////            }
+//            FloatingActionButton(
+//                onClick = { onTryOnClick(product.product_id) },
+//                shape = RoundedCornerShape(4.dp),
+//                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+//                contentColor = MaterialTheme.colorScheme.onSurface,
+//                modifier = Modifier
+//                    .align(Alignment.BottomEnd)
+//                    .padding(horizontal = 20.dp, vertical = 20.dp)
+//            ) {
+//                Icon(
+//                    imageVector = Icons.Rounded.CenterFocusWeak,
+//                    contentDescription = "Virtual clothes try-on icon",
+//                    modifier = Modifier.size(30.dp)
+//                )
+//            }
+//        }
+//    }
+//}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PartialBottomSheet(
     onBack: () -> Unit,
     product: ProductTable,
+    onTryOnClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-
     val scaffoldState = rememberBottomSheetScaffoldState()
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetContent = {
-            BsContent(
-                product = product
-            )
+            BsContent(product = product)
         },
         sheetPeekHeight = 100.dp,
-        sheetShape = RoundedCornerShape(0.dp)
+        sheetShape = RoundedCornerShape(0.dp),
+        modifier = modifier
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(color = MaterialTheme.colorScheme.surfaceVariant)
         ) {
+            // --- Product image (bottom layer) ---
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(product.product_image)
@@ -478,16 +594,33 @@ fun PartialBottomSheet(
                     .fillMaxSize()
                     .aspectRatio(1 / 2f)
                     .absoluteOffset(x = 0.dp, y = (-25).dp)
+                    .zIndex(0f)
             )
-//            Image(
-//                painter = painterResource(id = R.drawable.teen),
-//                contentDescription = "Product image",
-//                modifier = Modifier
-//                    .fillMaxSize()
-//                    .aspectRatio(1 / 2f)
-//                    .graphicsLayer(scaleX = 1.35f, scaleY = 1.35f)
-//                    .absoluteOffset(x = 0.dp, y = (-75).dp)
-//            )
+
+            // --- FAB (middle layer: above image, below sheet) ---
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = 120.dp) // same as your sheetPeekHeight or a bit more
+                    .padding(end = 20.dp)
+                    .zIndex(1f),
+                contentAlignment = Alignment.BottomEnd
+            ) {
+                FloatingActionButton(
+                    onClick = { onTryOnClick(product.product_id) },
+                    shape = RoundedCornerShape(4.dp),
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.CenterFocusWeak,
+                        contentDescription = "Virtual clothes try-on icon",
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+            }
+
+            // --- Back button (top layer, above everything) ---
             Box(
                 modifier = Modifier
                     .align(Alignment.TopStart)
@@ -499,47 +632,28 @@ fun PartialBottomSheet(
                         indication = LocalIndication.current
                     ) {
                         onBack()
-                    },
+                    }
+                    .zIndex(2f),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Back",
                     tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier
-                        .size(32.dp)
+                    modifier = Modifier.size(32.dp)
                 )
-            }
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(670.dp)
-            ) {
-                FloatingActionButton(
-                    onClick = { },
-                    shape = RoundedCornerShape(4.dp),
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(horizontal = 20.dp, vertical = 12.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.CenterFocusWeak,
-                        contentDescription = "Virtual clothes try-on icon",
-                        modifier = Modifier
-                            .size(30.dp)
-                    )
-                }
             }
         }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun ProductDetailsScreenPreview() {
-    AppTheme {
-        ProductDetailsScreen(productId = 0, onBack = {}, onGoToCart = {})
-    }
-}
+
+
+
+//@Preview(showBackground = true)
+//@Composable
+//fun ProductDetailsScreenPreview() {
+//    AppTheme {
+//        ProductDetailsScreen(productId = 0, onBack = {}, onGoToCart = {})
+//    }
+//}

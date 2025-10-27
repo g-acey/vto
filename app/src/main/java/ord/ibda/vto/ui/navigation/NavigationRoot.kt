@@ -45,6 +45,7 @@ import ord.ibda.vto.ui.productdetails.ProductDetailsScreen
 import ord.ibda.vto.ui.profile.ProfileScreen
 import ord.ibda.vto.ui.session.viewmodel.SessionViewModel
 import ord.ibda.vto.ui.signup.SignUpScreen
+import ord.ibda.vto.ui.vto.VtoScreen
 import ord.ibda.vto.ui.welcome.WelcomeScreen
 
 @Serializable
@@ -61,6 +62,9 @@ data object HomeScreenNK: NavKey
 
 @Serializable
 data class ProductDetailScreenNK(val productId: Int): NavKey
+
+@Serializable
+data class VtoScreenNK(val productId: Int) : NavKey
 
 @Serializable
 data object CartScreenNK: NavKey
@@ -218,7 +222,24 @@ fun NavigationRoot(
                             ProductDetailsScreen(
                                 productId = key.productId,
                                 onBack = { backStack.removeLastOrNull() },
-                                onGoToCart = { backStack.add(CartScreenNK) }
+                                onGoToCart = { backStack.add(CartScreenNK) },
+                                onTryOnClick = { productId ->
+                                    backStack.add(VtoScreenNK(productId))
+                                }
+                            )
+                        }
+                    }
+
+                    is VtoScreenNK -> {
+                        NavEntry(
+                            key = key
+                        ) {
+                            VtoScreen(
+                                onBack = { backStack.removeLastOrNull() },
+                                onTryOutClick = {
+                                    // You’ll navigate to the result screen later, e.g.
+                                    // backStack.add(VtoResultScreenNK(key.productId))
+                                },
                             )
                         }
                     }

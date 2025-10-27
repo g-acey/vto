@@ -1,4 +1,7 @@
 package ord.ibda.vto.ui.vto.viewmodel
 
-class VtoEvent {
+sealed class VtoEvent {
+    data class SetUserImage(val uri: String): VtoEvent()
+    data class SetProductImage(val url: String): VtoEvent()
+    object RemoveUserImage: VtoEvent()
 }
