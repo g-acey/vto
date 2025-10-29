@@ -55,6 +55,4 @@ class SessionViewModel @Inject constructor(
             _loggedInUserId.value = null
         }
     }
-
-    fun isLoggedIn(): Boolean = _loggedInUserId.value != null
 }

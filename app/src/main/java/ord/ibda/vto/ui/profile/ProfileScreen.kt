@@ -12,17 +12,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.HelpOutline
+import androidx.compose.material.icons.automirrored.outlined.ListAlt
+import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.CreditCard
 import androidx.compose.material.icons.outlined.Email
-import androidx.compose.material.icons.outlined.HelpOutline
-import androidx.compose.material.icons.outlined.ListAlt
-import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Place
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -33,22 +32,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ord.ibda.vto.ui.profile.viewmodel.ProfileEvent
 import ord.ibda.vto.ui.profile.viewmodel.ProfileViewModel
-import ord.ibda.vto.ui.theme.AppTheme
 
 @Composable
 fun ProfileScreen(
+    modifier: Modifier = Modifier,
     profileViewModel: ProfileViewModel = hiltViewModel(),
     onLogout: () -> Unit,
     goEditProfile: () -> Unit,
     goOrders: () -> Unit,
     goBack: () -> Unit,
-    modifier: Modifier = Modifier
 ) {
     val profileState by profileViewModel.state.collectAsState()
 
@@ -102,7 +99,7 @@ fun ProfileScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         ProfileMenuItem(
-            Icons.Outlined.ListAlt,
+            Icons.AutoMirrored.Outlined.ListAlt,
             "My orders",
             onClick = { goOrders() }
         )
@@ -114,11 +111,11 @@ fun ProfileScreen(
         ProfileMenuItem(Icons.Outlined.CreditCard, "Payment methods")
         ProfileMenuItem(Icons.Outlined.Place, "Delivery address")
         Spacer(modifier = Modifier.height(16.dp))
-        ProfileMenuItem(Icons.Outlined.HelpOutline, "Help")
+        ProfileMenuItem(Icons.AutoMirrored.Outlined.HelpOutline, "Help")
         ProfileMenuItem(Icons.Outlined.Email, "Inbox")
         ProfileMenuItem(Icons.Outlined.Settings, "Settings")
         ProfileMenuItem(
-            Icons.Outlined.Logout,
+            Icons.AutoMirrored.Outlined.Logout,
             "Log out",
             onClick = {
                 profileViewModel.onEvent(ProfileEvent.Logout)
@@ -128,7 +125,7 @@ fun ProfileScreen(
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Divider()
+        HorizontalDivider()
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = "Terms and conditions | Privacy policy",

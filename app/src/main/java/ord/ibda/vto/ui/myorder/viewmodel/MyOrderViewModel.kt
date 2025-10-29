@@ -3,6 +3,7 @@ package ord.ibda.vto.ui.myorder.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,6 +26,7 @@ class MyOrderViewModel @Inject constructor(
 ): ViewModel() {
 
     private val _orderStatus = MutableStateFlow(OrderStatus.ALL)
+    @OptIn(ExperimentalCoroutinesApi::class)
     private val _orders = _orderStatus
         .flatMapLatest { status ->
             flow {

@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import ord.ibda.vto.data.db.CartDao
 import ord.ibda.vto.data.db.OrderDao
-import ord.ibda.vto.data.models.rooms.CartTable
 import ord.ibda.vto.data.models.rooms.OrderItemTable
 import ord.ibda.vto.data.models.rooms.OrderTable
 import ord.ibda.vto.data.session.SessionManager

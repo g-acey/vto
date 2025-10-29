@@ -57,7 +57,7 @@ fun LoginScreen(
     val loginState by loginViewModel.state.collectAsState()
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.surfaceVariant)
     ) {

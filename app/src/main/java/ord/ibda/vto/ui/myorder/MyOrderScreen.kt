@@ -1,6 +1,5 @@
 package ord.ibda.vto.ui.myorder
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,8 +16,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Divider
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
@@ -29,38 +28,31 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import ord.ibda.vto.R
 import ord.ibda.vto.data.models.FullOrderWithDetails
 import ord.ibda.vto.data.models.OrderStatus
-import ord.ibda.vto.data.models.OrderWithItems
 import ord.ibda.vto.ui.myorder.viewmodel.MyOrderEvent
 import ord.ibda.vto.ui.myorder.viewmodel.MyOrderViewModel
-import ord.ibda.vto.ui.theme.AppTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 @Composable
 fun MyOrdersScreen(
+    modifier: Modifier = Modifier,
     myOrderViewModel: MyOrderViewModel = hiltViewModel(),
     onBack: () -> Unit,
     goOrderDetails: (Int) -> Unit,
-    modifier: Modifier = Modifier
 ) {
     val myOrderState by myOrderViewModel.state.collectAsState()
 
@@ -73,7 +65,7 @@ fun MyOrdersScreen(
 //    )
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(top = 25.dp)
     ) {
@@ -82,7 +74,7 @@ fun MyOrdersScreen(
             modifier = Modifier.padding(vertical = 20.dp, horizontal = 20.dp)
         ) {
             Icon(
-                imageVector = Icons.Default.ArrowBack,
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Back",
                 modifier = Modifier
                     .size(32.dp)
@@ -100,7 +92,7 @@ fun MyOrdersScreen(
             containerColor = Color.Transparent,
             contentColor = MaterialTheme.colorScheme.onSurface,
             indicator = { tabPositions ->
-                TabRowDefaults.Indicator(
+                TabRowDefaults.SecondaryIndicator(
                     color = MaterialTheme.colorScheme.onSecondaryContainer,
                     modifier = Modifier
                         .tabIndicatorOffset(tabPositions[selectedTabIndex])
@@ -151,7 +143,7 @@ fun MyOrdersScreen(
                         onClick = { goOrderDetails(order.order.order_id) }
                     )
                     if (index < myOrderState.orders.lastIndex) {
-                        Divider()
+                        HorizontalDivider()
                     }
                 }
             }

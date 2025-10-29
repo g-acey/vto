@@ -3,6 +3,7 @@ package ord.ibda.vto.ui.home.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -18,6 +19,7 @@ class HomeViewModel @Inject constructor(
 ): ViewModel() {
 
     private val _productType = MutableStateFlow(ProductType.ALL)
+    @OptIn(ExperimentalCoroutinesApi::class)
     private val _products = _productType
         .flatMapLatest { productType ->
             when(productType) {

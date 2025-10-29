@@ -19,32 +19,24 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.NavigateNext
 import androidx.compose.material.icons.filled.AddCircleOutline
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.outlined.NavigateNext
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -53,11 +45,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import ord.ibda.vto.R
 import ord.ibda.vto.data.models.OrderProductDetail
 import ord.ibda.vto.ui.checkout.viewmodel.CheckoutEvent
@@ -146,7 +135,7 @@ fun CheckoutScreen(
                             .clickable {  }
                     )
                 }
-                item { Divider() }
+                item { HorizontalDivider() }
 
                 item {
                     PaymentColumn(
@@ -154,13 +143,13 @@ fun CheckoutScreen(
                             .clickable {  }
                     )
                 }
-                item { Divider() }
+                item { HorizontalDivider() }
 
                 items(cartList) { item ->
                     CartItemRow(item)
                 }
 
-                item { Divider() }
+                item { HorizontalDivider() }
 
                 item {
                     PromoColumn(
@@ -168,7 +157,7 @@ fun CheckoutScreen(
                             .clickable {  }
                     )
                 }
-                item { Divider() }
+                item { HorizontalDivider() }
 
                 item {
                     OrderSummary(
@@ -260,7 +249,7 @@ fun CheckoutHeader(
             .padding(top = 20.dp, start = 20.dp, end = 20.dp, bottom = 10.dp)
     ) {
         Icon(
-            imageVector = Icons.Default.ArrowBack,
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
             contentDescription = "Back",
             modifier = Modifier
                 .size(32.dp)
@@ -301,7 +290,7 @@ fun AddressColumn(
             )
         }
         Icon(
-            Icons.Outlined.NavigateNext, contentDescription = "Next",
+            Icons.AutoMirrored.Outlined.NavigateNext, contentDescription = "Next",
             tint = MaterialTheme.colorScheme.onSurface
         )
     }
@@ -331,7 +320,7 @@ fun PaymentColumn(
                 .weight(1f)
         )
         Icon(
-            Icons.Outlined.NavigateNext, contentDescription = "Next",
+            Icons.AutoMirrored.Outlined.NavigateNext, contentDescription = "Next",
             tint = MaterialTheme.colorScheme.onSurface
         )
     }

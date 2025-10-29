@@ -225,7 +225,7 @@ fun HorizontalTabRow(
         contentColor = MaterialTheme.colorScheme.onSurface,
         edgePadding = 20.dp,
         indicator = { tabPositions ->
-            TabRowDefaults.Indicator(
+            TabRowDefaults.SecondaryIndicator(
                 color = MaterialTheme.colorScheme.onSecondaryContainer,
                 modifier = Modifier
                     .tabIndicatorOffset(tabPositions[selectedTabIndex])

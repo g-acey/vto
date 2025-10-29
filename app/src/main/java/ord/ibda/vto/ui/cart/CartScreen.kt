@@ -40,7 +40,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import ord.ibda.vto.data.models.CartProductDetail
@@ -52,10 +51,10 @@ import java.util.Locale
 
 @Composable
 fun CartScreen(
+    modifier: Modifier = Modifier,
     cartViewModel: CartViewModel,
     goCheckoutScreen: (Int) -> Unit,
     bottomBar: @Composable () -> Unit = {},
-    modifier: Modifier = Modifier
 ) {
     val cartState by cartViewModel.state.collectAsState()
 
@@ -80,7 +79,7 @@ fun CartScreen(
         }
     ) { innerPadding ->
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .background(MaterialTheme.colorScheme.surfaceContainerLow)
                 .padding(top = 25.dp)
         ) {

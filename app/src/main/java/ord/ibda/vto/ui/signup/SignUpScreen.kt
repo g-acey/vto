@@ -28,9 +28,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -43,7 +40,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
 import ord.ibda.vto.R
 import ord.ibda.vto.ui.signup.viewmodel.SignUpEvent
 import ord.ibda.vto.ui.signup.viewmodel.SignUpViewModel
@@ -60,7 +56,7 @@ fun SignUpScreen(
     val signUpState by signUpViewModel.state.collectAsState()
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(color = MaterialTheme.colorScheme.surfaceVariant)
     ) {
@@ -180,13 +176,13 @@ fun SignUpBottomSheet(
 
 @Composable
 fun TextInputForm(
+    modifier: Modifier = Modifier,
     value: String,
     valueChange: (String) -> Unit,
     valueClear: () -> Unit,
     isError: Boolean,
     supportingText: @Composable () -> Unit = {},
     label: String,
-    modifier: Modifier = Modifier
 ) {
       OutlinedTextField(
           value = value,
@@ -212,6 +208,7 @@ fun TextInputForm(
 
 @Composable
 fun PasswordInputForm(
+    modifier: Modifier = Modifier,
     value: String,
     valueChange: (String) -> Unit,
     isVisible: Boolean,
@@ -219,7 +216,6 @@ fun PasswordInputForm(
     isError: Boolean,
     label: String,
     supportingText: String = "",
-    modifier: Modifier = Modifier
 ) {
     OutlinedTextField(
         value = value,
