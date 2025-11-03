@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import ord.ibda.vto.ui.cart.CartScreen
 import ord.ibda.vto.ui.cart.viewmodel.CartViewModel
 import ord.ibda.vto.ui.checkout.CheckoutScreen
@@ -46,6 +47,10 @@ import ord.ibda.vto.ui.profile.ProfileScreen
 import ord.ibda.vto.ui.session.viewmodel.SessionViewModel
 import ord.ibda.vto.ui.signup.SignUpScreen
 import ord.ibda.vto.ui.vto.VtoScreen
+import ord.ibda.vto.ui.vto.viewmodel.VtoViewModel
+import ord.ibda.vto.ui.vtoresult.VtoResultScreen
+import ord.ibda.vto.ui.vtoresult.viewmodel.VtoResultEvent
+import ord.ibda.vto.ui.vtoresult.viewmodel.VtoResultViewModel
 import ord.ibda.vto.ui.welcome.WelcomeScreen
 
 @Serializable
@@ -65,6 +70,9 @@ data class ProductDetailScreenNK(val productId: Int): NavKey
 
 @Serializable
 data class VtoScreenNK(val productId: Int) : NavKey
+
+@Serializable
+data class VtoResultScreenNK(val resultUri: String) : NavKey
 
 @Serializable
 data object CartScreenNK: NavKey
@@ -90,14 +98,19 @@ fun NavigationRoot(
     sessionViewModel: SessionViewModel = hiltViewModel(),
     cartViewModel: CartViewModel = hiltViewModel(),
     checkoutViewModel: CheckoutViewModel = hiltViewModel(),
-    editProfileViewModel: EditProfileViewModel = hiltViewModel()
+    editProfileViewModel: EditProfileViewModel = hiltViewModel(),
+    vtoViewModel: VtoViewModel = hiltViewModel(),
+    vtoResultViewModel: VtoResultViewModel = hiltViewModel()
 ) {
     val loggedInUserId by sessionViewModel.loggedInUserId.collectAsState()
     val isInitialized by sessionViewModel.isInitialized.collectAsState()
     val cartState by cartViewModel.state.collectAsState()
     val checkoutState by checkoutViewModel.state.collectAsState()
     val editProfileState by editProfileViewModel.state.collectAsState()
+    val vtoState by vtoViewModel.state.collectAsState()
+    val vtoResultState by vtoResultViewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     if (!isInitialized) {
         LoadingScreen()
@@ -127,6 +140,40 @@ fun NavigationRoot(
             snackbarHostState.showSnackbar(message)
             editProfileViewModel.onEvent(EditProfileEvent.ClearMessage)
         }
+    }
+
+    LaunchedEffect(vtoResultState.snackBarMessage) {
+        vtoResultState.snackBarMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            vtoResultViewModel.onEvent(VtoResultEvent.ClearSnackbar)
+        }
+    }
+
+    LaunchedEffect(vtoState.resultBitmap) {
+        val bitmap = vtoState.resultBitmap
+        if (bitmap == null) {
+            println("🛑 VTO result bitmap is null")
+            return@LaunchedEffect
+        } else {
+            println("✅ VTO result bitmap is available, proceeding to save and navigate")
+        }
+
+        val file = java.io.File(context.cacheDir, "vto_result_${System.currentTimeMillis()}.jpg")
+        try {
+            file.outputStream().use { out ->
+                val success = bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 100, out)
+                println("💾 Bitmap saved to file: ${file.absolutePath}, success: $success")
+            }
+        } catch (e: Exception) {
+            println("❌ Error saving bitmap: ${e.message}")
+            return@LaunchedEffect
+        }
+
+        val resultUri = file.toUri().toString()
+        println("🧭 Navigating to VtoResultScreenNK with URI: $resultUri")
+
+        backStack.add(VtoResultScreenNK(resultUri))
+        println("✅ BackStack after adding VtoResultScreenNK: $backStack")
     }
 
     LaunchedEffect(loggedInUserId) {
@@ -235,11 +282,25 @@ fun NavigationRoot(
                             key = key
                         ) {
                             VtoScreen(
+                                productId = key.productId,
+                                vtoViewModel = vtoViewModel,
+                                onBack = { backStack.removeLastOrNull() }
+                            )
+                        }
+                    }
+
+                    is VtoResultScreenNK -> {
+                        NavEntry(
+                            key = key
+                        ) {
+                            VtoResultScreen(
+                                vtoResultViewModel = vtoResultViewModel,
+                                imageUri = key.resultUri,
                                 onBack = { backStack.removeLastOrNull() },
-                                onTryOutClick = {
-                                    // You’ll navigate to the result screen later, e.g.
-                                    // backStack.add(VtoResultScreenNK(key.productId))
-                                },
+                                onSave = { savedUri ->
+                                    backStack.removeLastOrNull()
+                                    backStack.removeLastOrNull()
+                                }
                             )
                         }
                     }

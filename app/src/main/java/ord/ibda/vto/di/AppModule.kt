@@ -1,14 +1,14 @@
 package ord.ibda.vto.di
 
-import android.app.Application
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import ord.ibda.vto.data.api.ApiService
-import ord.ibda.vto.data.repository.VtoRepositoryImpl
-import ord.ibda.vto.domain.repository.VtoRepository
 import retrofit2.Retrofit
+import retrofit2.converter.scalars.ScalarsConverterFactory
 import javax.inject.Singleton
 
 @Module
@@ -18,15 +18,21 @@ class AppModule {
     @Provides
     @Singleton
     fun provideApiService(): ApiService {
+        val logging = HttpLoggingInterceptor()
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY)
+
+        val client = OkHttpClient.Builder()
+            .connectTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
+            .writeTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
+            .readTimeout(180, java.util.concurrent.TimeUnit.SECONDS)
+            .addInterceptor(logging)
+            .build()
+
         return Retrofit.Builder()
-            .baseUrl("https://test.com")
+            .baseUrl("https://bd1d0df3102d.ngrok-free.app/")
+            .addConverterFactory(ScalarsConverterFactory.create())
+            .client(client)
             .build()
             .create(ApiService::class.java)
     }
-
-//    @Provides
-//    @Singleton
-//    fun provideVtoRepository(api: ApiService, app: Application): VtoRepository {
-//        return VtoRepositoryImpl(api, app)
-//    }
 }

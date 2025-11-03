@@ -37,6 +37,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,7 +51,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
-import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import ord.ibda.vto.ui.vto.viewmodel.VtoEvent
 import ord.ibda.vto.ui.vto.viewmodel.VtoViewModel
@@ -60,12 +60,16 @@ import java.io.File
 @Composable
 fun VtoScreen(
     modifier: Modifier = Modifier,
-    vtoViewModel: VtoViewModel = hiltViewModel(),
+    productId: Int,
+    vtoViewModel: VtoViewModel,
     onBack: () -> Unit,
-    onTryOutClick: () -> Unit,
 ) {
     val vtoState by vtoViewModel.state.collectAsState()
     val context = LocalContext.current
+
+    LaunchedEffect(productId) {
+        vtoViewModel.onEvent(VtoEvent.LoadProductById(productId))
+    }
 
     // Modal Bottom Sheet
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -181,119 +185,128 @@ fun VtoScreen(
         }
     }
 
-    Scaffold(
-        bottomBar = {
-            Surface(
-                tonalElevation = 6.dp,
-                shadowElevation = 8.dp,
-                color = MaterialTheme.colorScheme.surfaceContainerLow,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(105.dp)
-            ) {
-                Box(
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        Scaffold(
+            bottomBar = {
+                Surface(
+                    tonalElevation = 6.dp,
+                    shadowElevation = 8.dp,
+                    color = MaterialTheme.colorScheme.surfaceContainerLow,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(20.dp)
+                        .height(105.dp)
                 ) {
-                    Button(
-                        onClick = { onTryOutClick() },
-                        enabled = vtoState.userImageUri != null,
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onPrimaryContainer),
-                        shape = RoundedCornerShape(4.dp),
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(53.dp)
+                            .padding(20.dp)
                     ) {
-                        Text(
-                            text = "Try out",
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            style = MaterialTheme.typography.labelLarge,
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                }
-            }
-        },
-        modifier = modifier
-    ) { contentPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surfaceContainerLow)
-                .padding(contentPadding)
-        ) {
-            Box(modifier = Modifier.padding(horizontal = 20.dp)) {
-                VtoHeader(onBack = onBack)
-            }
-
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = 20.dp)
-                    .padding(top = 20.dp)
-            ) {
-                Text(
-                    text = "Upload a photo of yourself",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = "For best results, use a clear background and good lighting.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(475.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .clickable { showSheet = true },
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (vtoState.userImageUri != null) {
-                        Image(
-                            painter = rememberAsyncImagePainter(vtoState.userImageUri),
-                            contentDescription = "User Image Preview",
-                            modifier = Modifier.fillMaxSize()
-                        )
-
-                        IconButton(
-                            onClick = { vtoViewModel.onEvent(VtoEvent.RemoveUserImage) },
+                        Button(
+                            onClick = { vtoViewModel.onEvent(VtoEvent.TryOn) },
+                            enabled = vtoState.userImageUri != null && !vtoState.isLoading,
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onPrimaryContainer),
+                            shape = RoundedCornerShape(4.dp),
                             modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .padding(vertical = 45.dp, horizontal = 20.dp)
-                                .size(28.dp)
-                                .background(
-                                    MaterialTheme.colorScheme.surfaceVariant,
-                                    shape = RoundedCornerShape(4.dp)
-                                )
+                                .fillMaxWidth()
+                                .height(53.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Delete,
-                                contentDescription = "Remove Image",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            Text(
+                                text = if (vtoState.isLoading) "Loading..." else "Try out",
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                style = MaterialTheme.typography.labelLarge,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.SemiBold
                             )
                         }
-                    } else {
-                        Icon(
-                            imageVector = Icons.Outlined.Image,
-                            contentDescription = "Upload Placeholder",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(64.dp)
-                        )
                     }
                 }
+            },
+            modifier = modifier
+        ) { contentPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                    .padding(contentPadding)
+            ) {
+                Box(modifier = Modifier.padding(horizontal = 20.dp)) {
+                    VtoHeader(onBack = onBack)
+                }
 
-                Spacer(modifier = Modifier.height(80.dp))
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 20.dp)
+                        .padding(top = 20.dp)
+                ) {
+                    Text(
+                        text = "Upload a photo of yourself",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = "For best results, use a clear background and good lighting.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(475.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .clickable { showSheet = true },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (vtoState.userImageUri != null) {
+                            Image(
+                                painter = rememberAsyncImagePainter(vtoState.userImageUri),
+                                contentDescription = "User Image Preview",
+                                modifier = Modifier.fillMaxSize()
+                            )
+
+                            IconButton(
+                                onClick = { vtoViewModel.onEvent(VtoEvent.RemoveUserImage) },
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(vertical = 20.dp, horizontal = 20.dp)
+                                    .size(28.dp)
+                                    .background(
+                                        MaterialTheme.colorScheme.surfaceContainerLow,
+                                        shape = RoundedCornerShape(4.dp)
+                                    )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Delete,
+                                    contentDescription = "Remove Image",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        } else {
+                            Icon(
+                                imageVector = Icons.Outlined.Image,
+                                contentDescription = "Upload Placeholder",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(64.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(80.dp))
+                }
             }
+        }
+
+        if (vtoState.isLoading) {
+            LoadingOverlay()
         }
     }
 }
@@ -320,6 +333,20 @@ fun VtoHeader(
         Text(
             text = "Virtual Try-on",
             style = MaterialTheme.typography.displaySmall
+        )
+    }
+}
+
+@Composable
+fun LoadingOverlay() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.6f)),
+        contentAlignment = Alignment.Center
+    ) {
+        androidx.compose.material3.CircularProgressIndicator(
+            color = MaterialTheme.colorScheme.primary,
         )
     }
 }

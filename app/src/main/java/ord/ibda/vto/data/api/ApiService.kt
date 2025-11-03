@@ -1,9 +1,19 @@
 package ord.ibda.vto.data.api
 
-import retrofit2.http.GET
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.ResponseBody
+import retrofit2.Response
+import retrofit2.http.Multipart
+import retrofit2.http.POST
+import retrofit2.http.Part
 
 interface ApiService {
 
-    @GET("test")
-    suspend fun doNetworkCall()
+    @Multipart
+    @POST("tryon/")
+    suspend fun tryOn(
+        @Part userImage: MultipartBody.Part,
+        @Part("cloth_url") clothUrl: RequestBody
+    ): Response<ResponseBody>
 }
