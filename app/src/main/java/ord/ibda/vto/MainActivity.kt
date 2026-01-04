@@ -17,7 +17,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            AppTheme {
+            AppTheme(
+                darkTheme = false
+            ) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     NavigationRoot()
                 }

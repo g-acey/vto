@@ -29,7 +29,7 @@ class AppModule {
             .build()
 
         return Retrofit.Builder()
-            .baseUrl("https://bd1d0df3102d.ngrok-free.app/")
+            .baseUrl("https://25945a88aff2.ngrok-free.app/")
             .addConverterFactory(ScalarsConverterFactory.create())
             .client(client)
             .build()
